@@ -1,0 +1,369 @@
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { 
+  Users, 
+  MapPin, 
+  TrendingUp, 
+  Settings,
+  LogOut,
+  User,
+  Plus,
+  Trash2,
+  Edit,
+  Activity
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+
+const AdminDashboard = () => {
+  const [employees, setEmployees] = useState([
+    { id: "1", name: "John Doe", email: "john@demo.com", loginFrequency: 25, status: "active" },
+    { id: "2", name: "Jane Smith", email: "jane@demo.com", loginFrequency: 18, status: "active" },
+    { id: "3", name: "Mike Johnson", email: "mike@demo.com", loginFrequency: 12, status: "inactive" },
+    { id: "4", name: "Sarah Wilson", email: "sarah@demo.com", loginFrequency: 31, status: "active" },
+  ]);
+
+  const [userLogs, setUserLogs] = useState([
+    { id: "1", user: "John Doe", action: "Checked in", desk: "D-15", timestamp: "2024-01-15 09:30:00" },
+    { id: "2", user: "Jane Smith", action: "Booked desk", desk: "D-22", timestamp: "2024-01-15 09:15:00" },
+    { id: "3", user: "Mike Johnson", action: "Logged in", desk: "-", timestamp: "2024-01-15 08:45:00" },
+    { id: "4", user: "Sarah Wilson", action: "Checked out", desk: "D-08", timestamp: "2024-01-15 17:30:00" },
+  ]);
+
+  const [newEmployee, setNewEmployee] = useState({ name: "", email: "" });
+  const [isAddingEmployee, setIsAddingEmployee] = useState(false);
+
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleAddEmployee = () => {
+    if (newEmployee.name && newEmployee.email) {
+      const employee = {
+        id: Date.now().toString(),
+        name: newEmployee.name,
+        email: newEmployee.email,
+        loginFrequency: 0,
+        status: "active"
+      };
+      
+      setEmployees(prev => [...prev, employee]);
+      setNewEmployee({ name: "", email: "" });
+      setIsAddingEmployee(false);
+      
+      toast({
+        title: "Employee Added Successfully",
+        description: `${employee.name} has been added to the system.`,
+      });
+    }
+  };
+
+  const handleRemoveEmployee = (id: string) => {
+    const employee = employees.find(emp => emp.id === id);
+    setEmployees(prev => prev.filter(emp => emp.id !== id));
+    
+    toast({
+      title: "Employee Removed",
+      description: `${employee?.name} has been removed from the system.`,
+    });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('userType');
+    localStorage.removeItem('userEmail');
+    toast({
+      title: "Successfully Logged Out",
+      description: "See you next time!",
+    });
+    navigate('/');
+  };
+
+  const stats = [
+    {
+      title: "Total Employees",
+      value: employees.length.toString(),
+      icon: Users,
+      description: "Active users"
+    },
+    {
+      title: "Active Bookings",
+      value: "15",
+      icon: MapPin,
+      description: "Currently reserved"
+    },
+    {
+      title: "Daily Logins",
+      value: "42",
+      icon: TrendingUp,
+      description: "Today"
+    },
+    {
+      title: "Desk Utilization",
+      value: "78%",
+      icon: Activity,
+      description: "This week"
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="bg-white border-b border-border shadow-custom-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-4">
+              <div className="bg-gradient-primary p-2 rounded-lg">
+                <Settings className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-primary">DeskFlow Admin</h1>
+                <p className="text-sm text-muted-foreground">Administration Dashboard</p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <Link to="/profile">
+                <Button variant="ghost" size="sm">
+                  <User className="h-4 w-4 mr-2" />
+                  Admin Profile
+                </Button>
+              </Link>
+
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-primary mb-2">
+            Admin Dashboard
+          </h2>
+          <p className="text-muted-foreground">
+            Manage employees, desk statuses, and monitor system activity.
+          </p>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {stats.map((stat, index) => (
+            <Card 
+              key={stat.title}
+              className="animate-fade-in hover:shadow-custom-md transition-all duration-300"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {stat.title}
+                    </p>
+                    <p className="text-2xl font-bold text-primary">
+                      {stat.value}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {stat.description}
+                    </p>
+                  </div>
+                  <div className="bg-gradient-primary p-3 rounded-lg">
+                    <stat.icon className="h-6 w-6 text-primary-foreground" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Employee Management */}
+          <Card className="shadow-custom-md">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl font-bold text-primary">
+                  Employee Management
+                </CardTitle>
+                <Button 
+                  size="sm" 
+                  onClick={() => setIsAddingEmployee(true)}
+                  className="bg-gradient-primary"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Employee
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {/* Add Employee Form */}
+              {isAddingEmployee && (
+                <div className="mb-6 p-4 bg-secondary/20 rounded-lg">
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="name">Employee Name</Label>
+                      <Input
+                        id="name"
+                        value={newEmployee.name}
+                        onChange={(e) => setNewEmployee(prev => ({ ...prev, name: e.target.value }))}
+                        placeholder="John Doe"
+                        className="border-primary/20 focus:border-primary"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">Email Address</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={newEmployee.email}
+                        onChange={(e) => setNewEmployee(prev => ({ ...prev, email: e.target.value }))}
+                        placeholder="john@company.com"
+                        className="border-primary/20 focus:border-primary"
+                      />
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button size="sm" onClick={handleAddEmployee}>
+                        Add Employee
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={() => {
+                          setIsAddingEmployee(false);
+                          setNewEmployee({ name: "", email: "" });
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Employee List */}
+              <div className="space-y-3">
+                {employees.map((employee) => (
+                  <div 
+                    key={employee.id}
+                    className="flex items-center justify-between p-4 bg-secondary/10 rounded-lg"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="bg-gradient-primary p-2 rounded-lg">
+                        <User className="h-4 w-4 text-primary-foreground" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-primary">{employee.name}</p>
+                        <p className="text-sm text-muted-foreground">{employee.email}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {employee.loginFrequency} logins this month
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant={employee.status === 'active' ? 'default' : 'secondary'}>
+                        {employee.status}
+                      </Badge>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleRemoveEmployee(employee.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Real-time User Logs */}
+          <Card className="shadow-custom-md">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-primary">
+                Real-time User Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {userLogs.map((log) => (
+                  <div 
+                    key={log.id}
+                    className="flex items-center justify-between p-3 bg-secondary/10 rounded-lg"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="bg-gradient-primary p-2 rounded-lg">
+                        <Activity className="h-4 w-4 text-primary-foreground" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-primary">{log.user}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {log.action} {log.desk !== '-' && `at ${log.desk}`}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(log.timestamp).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Desk Management */}
+        <Card className="mt-8 shadow-custom-md">
+          <CardHeader>
+            <CardTitle className="text-xl font-bold text-primary">
+              Desk Status Management
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {Array.from({ length: 32 }, (_, index) => {
+                const deskNumber = (index + 1).toString().padStart(2, '0');
+                const statuses = ['available', 'unavailable', 'booked', 'inactive'];
+                const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+                
+                return (
+                  <div key={deskNumber} className="text-center">
+                    <div 
+                      className={`w-8 h-8 rounded-full mx-auto mb-2 flex items-center justify-center text-xs font-bold text-white cursor-pointer transition-all duration-200 ${
+                        randomStatus === 'available' ? 'bg-desk-available' :
+                        randomStatus === 'unavailable' ? 'bg-desk-unavailable' :
+                        randomStatus === 'booked' ? 'bg-desk-booked' :
+                        'bg-desk-inactive'
+                      }`}
+                    >
+                      {deskNumber}
+                    </div>
+                    <Select defaultValue={randomStatus}>
+                      <SelectTrigger className="h-8 text-xs border-primary/20">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="available">Available</SelectItem>
+                        <SelectItem value="unavailable">Unavailable</SelectItem>
+                        <SelectItem value="booked">Booked</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default AdminDashboard;
