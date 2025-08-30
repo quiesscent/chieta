@@ -14,10 +14,11 @@ interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   deskId: string | null;
-  onConfirm: (deskId: string, date: string, time: string) => void;
+  deskType?: 'desk' | 'office';
+  onConfirm: (deskId: string, date: string, time: string, type: 'desk' | 'office') => void;
 }
 
-export const BookingModal = ({ isOpen, onClose, deskId, onConfirm }: BookingModalProps) => {
+export const BookingModal = ({ isOpen, onClose, deskId, deskType = 'desk', onConfirm }: BookingModalProps) => {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -41,6 +42,8 @@ export const BookingModal = ({ isOpen, onClose, deskId, onConfirm }: BookingModa
   };
 
   const timeSlots = [
+    "08:00 AM",
+    "08:30 AM",
     "09:00 AM",
     "09:30 AM",
     "10:00 AM",
@@ -57,7 +60,9 @@ export const BookingModal = ({ isOpen, onClose, deskId, onConfirm }: BookingModa
     "03:30 PM",
     "04:00 PM",
     "04:30 PM",
-    "05:00 PM"
+    "05:00 PM",
+    "05:30 PM",
+    "06:00 PM"
   ];
 
   const handleConfirm = async () => {
@@ -67,7 +72,7 @@ export const BookingModal = ({ isOpen, onClose, deskId, onConfirm }: BookingModa
       // Simulate API call delay for better UX
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      onConfirm(deskId, selectedDate, selectedTime);
+      onConfirm(deskId, selectedDate, selectedTime, deskType);
       
       // Reset form
       setSelectedDate("");
@@ -90,7 +95,7 @@ export const BookingModal = ({ isOpen, onClose, deskId, onConfirm }: BookingModa
             <div className="bg-gradient-primary p-2 rounded-lg">
               <MapPin className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span>Book Desk {deskId}</span>
+            <span>Book {deskType === 'office' ? 'Office' : 'Desk'} {deskId}</span>
           </DialogTitle>
         </DialogHeader>
 
@@ -141,7 +146,7 @@ export const BookingModal = ({ isOpen, onClose, deskId, onConfirm }: BookingModa
             <div className="bg-gradient-card rounded-lg p-4 space-y-2 animate-fade-in border border-primary/10">
               <h4 className="font-medium text-primary">Booking Summary</h4>
               <div className="text-sm text-muted-foreground space-y-1">
-                <p><strong>Desk:</strong> {deskId}</p>
+                <p><strong>{deskType === 'office' ? 'Office' : 'Desk'}:</strong> {deskId}</p>
                 <p><strong>Date:</strong> {selectedDate === formatDate(today) ? 'Today' : 'Tomorrow'}</p>
                 <p><strong>Time:</strong> {selectedTime}</p>
               </div>

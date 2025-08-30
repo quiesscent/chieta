@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DeskManagementModal } from "@/components/dashboard/DeskManagementModal";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Users, 
@@ -37,6 +37,26 @@ const AdminDashboard = () => {
 
   const [newEmployee, setNewEmployee] = useState({ name: "", email: "" });
   const [isAddingEmployee, setIsAddingEmployee] = useState(false);
+  const [selectedDesk, setSelectedDesk] = useState<any>(null);
+  const [isDeskModalOpen, setIsDeskModalOpen] = useState(false);
+
+  // Sample desk data for management
+  const [desks, setDesks] = useState(
+    Array.from({ length: 32 }, (_, index) => {
+      const deskNumber = (index + 1).toString().padStart(2, '0');
+      const statuses = ['available', 'unavailable', 'booked', 'inactive'];
+      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+      
+      return {
+        id: `D-${deskNumber}`,
+        type: 'desk' as const,
+        status: randomStatus,
+        currentUser: randomStatus === 'booked' || randomStatus === 'checked-in' 
+          ? employees[Math.floor(Math.random() * employees.length)]?.name 
+          : undefined
+      };
+    })
+  );
 
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -70,6 +90,21 @@ const AdminDashboard = () => {
       title: "Employee Removed",
       description: `${employee?.name} has been removed from the system.`,
     });
+  };
+
+  const handleDeskClick = (desk: any) => {
+    setSelectedDesk(desk);
+    setIsDeskModalOpen(true);
+  };
+
+  const handleDeskStatusUpdate = (deskId: string, newStatus: string) => {
+    setDesks(prev => 
+      prev.map(desk => 
+        desk.id === deskId 
+          ? { ...desk, status: newStatus, currentUser: newStatus === 'available' ? undefined : desk.currentUser }
+          : desk
+      )
+    );
   };
 
   const handleLogout = () => {
@@ -327,41 +362,50 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-              {Array.from({ length: 32 }, (_, index) => {
-                const deskNumber = (index + 1).toString().padStart(2, '0');
-                const statuses = ['available', 'unavailable', 'booked', 'inactive'];
-                const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-                
-                return (
-                  <div key={deskNumber} className="text-center">
-                    <div 
-                      className={`w-8 h-8 rounded-full mx-auto mb-2 flex items-center justify-center text-xs font-bold text-white cursor-pointer transition-all duration-200 ${
-                        randomStatus === 'available' ? 'bg-desk-available' :
-                        randomStatus === 'unavailable' ? 'bg-desk-unavailable' :
-                        randomStatus === 'booked' ? 'bg-desk-booked' :
-                        'bg-desk-inactive'
-                      }`}
-                    >
-                      {deskNumber}
-                    </div>
-                    <Select defaultValue={randomStatus}>
-                      <SelectTrigger className="h-8 text-xs border-primary/20">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="available">Available</SelectItem>
-                        <SelectItem value="unavailable">Unavailable</SelectItem>
-                        <SelectItem value="booked">Booked</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
-                      </SelectContent>
-                    </Select>
+              {desks.map((desk) => (
+                <div key={desk.id} className="text-center">
+                  <div 
+                    className={`w-8 h-8 rounded-full mx-auto mb-2 flex items-center justify-center text-xs font-bold text-white cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-lg ${
+                      desk.status === 'available' ? 'bg-desk-available hover:bg-green-600' :
+                      desk.status === 'unavailable' ? 'bg-desk-unavailable hover:bg-red-600' :
+                      desk.status === 'booked' ? 'bg-desk-booked hover:bg-orange-600' :
+                      'bg-desk-inactive hover:bg-gray-600'
+                    }`}
+                    onClick={() => handleDeskClick(desk)}
+                  >
+                    {desk.id.split('-')[1]}
                   </div>
-                );
-              })}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDeskClick(desk)}
+                    className="w-full h-7 text-xs"
+                  >
+                    <Settings className="h-3 w-3 mr-1" />
+                    Manage
+                  </Button>
+                  {desk.currentUser && (
+                    <p className="text-xs text-muted-foreground mt-1 truncate">
+                      {desk.currentUser}
+                    </p>
+                  )}
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Desk Management Modal */}
+      <DeskManagementModal
+        isOpen={isDeskModalOpen}
+        onClose={() => {
+          setIsDeskModalOpen(false);
+          setSelectedDesk(null);
+        }}
+        desk={selectedDesk}
+        onStatusUpdate={handleDeskStatusUpdate}
+      />
     </div>
   );
 };
