@@ -148,69 +148,75 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-white border-b border-border shadow-custom-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <div className="bg-gradient-primary p-2 rounded-lg">
-                <Settings className="h-6 w-6 text-primary-foreground" />
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16 gap-2">
+            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
+              <div className="bg-gradient-primary p-1.5 sm:p-2 rounded-lg">
+                <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-primary">DeskFlow Admin</h1>
-                <p className="text-sm text-muted-foreground">Administration Dashboard</p>
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-xl font-bold text-primary truncate">DeskFlow Admin</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Administration Dashboard</p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <Link to="/profile">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="hidden sm:flex">
                   <User className="h-4 w-4 mr-2" />
                   Admin Profile
                 </Button>
+                <Button variant="ghost" size="sm" className="sm:hidden p-2">
+                  <User className="h-4 w-4" />
+                </Button>
               </Link>
 
-              <Button variant="outline" size="sm" onClick={handleLogout}>
+              <Button variant="outline" size="sm" onClick={handleLogout} className="hidden sm:flex">
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleLogout} className="sm:hidden p-2">
+                <LogOut className="h-4 w-4" />
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Welcome Section */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-primary mb-2">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-primary mb-2">
             Admin Dashboard
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Manage employees, desk statuses, and monitor system activity.
           </p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
           {stats.map((stat, index) => (
             <Card 
               key={stat.title}
               className="animate-fade-in hover:shadow-custom-md transition-all duration-300"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
+              <CardContent className="p-3 sm:p-4 lg:pt-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">
                       {stat.title}
                     </p>
-                    <p className="text-2xl font-bold text-primary">
+                    <p className="text-lg sm:text-2xl font-bold text-primary">
                       {stat.value}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground hidden sm:block">
                       {stat.description}
                     </p>
                   </div>
-                  <div className="bg-gradient-primary p-3 rounded-lg">
-                    <stat.icon className="h-6 w-6 text-primary-foreground" />
+                  <div className="bg-gradient-primary p-2 sm:p-3 rounded-lg shrink-0">
+                    <stat.icon className="h-4 w-4 sm:h-6 sm:w-6 text-primary-foreground" />
                   </div>
                 </div>
               </CardContent>
@@ -361,11 +367,11 @@ const AdminDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2 sm:gap-3 lg:gap-4">
               {desks.map((desk) => (
                 <div key={desk.id} className="text-center">
                   <div 
-                    className={`w-8 h-8 rounded-full mx-auto mb-2 flex items-center justify-center text-xs font-bold text-white cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-lg ${
+                    className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full mx-auto mb-1 sm:mb-2 flex items-center justify-center text-xs font-bold text-white cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-lg ${
                       desk.status === 'available' ? 'bg-desk-available hover:bg-green-600' :
                       desk.status === 'unavailable' ? 'bg-desk-unavailable hover:bg-red-600' :
                       desk.status === 'booked' ? 'bg-desk-booked hover:bg-orange-600' :
@@ -373,20 +379,22 @@ const AdminDashboard = () => {
                     }`}
                     onClick={() => handleDeskClick(desk)}
                   >
-                    {desk.id.split('-')[1]}
+                    <span className="text-xs sm:text-xs">
+                      {desk.id.split('-')[1]}
+                    </span>
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleDeskClick(desk)}
-                    className="w-full h-7 text-xs"
+                    className="w-full h-6 sm:h-7 text-xs px-1 sm:px-2"
                   >
-                    <Settings className="h-3 w-3 mr-1" />
-                    Manage
+                    <Settings className="h-2 w-2 sm:h-3 sm:w-3 mr-0 sm:mr-1" />
+                    <span className="hidden sm:inline">Manage</span>
                   </Button>
                   {desk.currentUser && (
-                    <p className="text-xs text-muted-foreground mt-1 truncate">
-                      {desk.currentUser}
+                    <p className="text-xs text-muted-foreground mt-1 truncate max-w-full">
+                      {desk.currentUser.split(' ')[0]}
                     </p>
                   )}
                 </div>

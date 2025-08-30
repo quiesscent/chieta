@@ -95,8 +95,8 @@ export const FloorPlan = ({ onDeskClick, userBookings = [] }: FloorPlanProps) =>
   return (
     <div className="relative w-full max-w-4xl mx-auto">
       {/* Floor plan image */}
-      <div className="relative overflow-x-auto pb-4">
-        <div className="min-w-[800px] relative">
+      <div className="relative bg-secondary/10 rounded-lg p-2 sm:p-4">
+        <div className="relative w-full">
           <img
             src={floorPlanImage}
             alt="Office floor plan"
@@ -109,7 +109,7 @@ export const FloorPlan = ({ onDeskClick, userBookings = [] }: FloorPlanProps) =>
             return (
               <button
                 key={desk.id}
-                className={`absolute w-8 h-8 rounded-full border-2 transition-all duration-300 hover:scale-125 hover:shadow-custom-lg hover:z-10 focus:scale-125 focus:shadow-custom-lg focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center justify-center text-xs font-bold text-white shadow-md animate-bounce-in interactive-element ${getDeskColor(status)} ${getDeskCursor(status)}`}
+                className={`absolute w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 transition-all duration-300 hover:scale-125 hover:shadow-custom-lg hover:z-10 focus:scale-125 focus:shadow-custom-lg focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center justify-center text-xs font-bold text-white shadow-md animate-bounce-in interactive-element ${getDeskColor(status)} ${getDeskCursor(status)}`}
                 style={{
                   left: `${desk.x}%`,
                   top: `${desk.y}%`,
@@ -120,7 +120,9 @@ export const FloorPlan = ({ onDeskClick, userBookings = [] }: FloorPlanProps) =>
                 title={`Desk ${desk.id} - ${status}`}
                 disabled={status === 'unavailable' || status === 'inactive'}
               >
-                {desk.id.split('-')[1]}
+                <span className="text-xs">
+                  {desk.id.split('-')[1]}
+                </span>
               </button>
             );
           })}
@@ -128,26 +130,26 @@ export const FloorPlan = ({ onDeskClick, userBookings = [] }: FloorPlanProps) =>
       </div>
 
       {/* Legend */}
-      <div className="mt-6 flex flex-wrap justify-center gap-6 text-sm">
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 rounded-full bg-desk-available border-2 border-green-600"></div>
-          <span>Available</span>
+      <div className="mt-4 sm:mt-6 flex flex-wrap justify-center gap-3 sm:gap-4 lg:gap-6 text-xs sm:text-sm">
+        <div className="flex items-center space-x-1 sm:space-x-2">
+          <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-desk-available border-2 border-green-600"></div>
+          <span className="whitespace-nowrap">Available</span>
         </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 rounded-full bg-desk-unavailable border-2 border-red-600"></div>
-          <span>Unavailable</span>
+        <div className="flex items-center space-x-1 sm:space-x-2">
+          <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-desk-unavailable border-2 border-red-600"></div>
+          <span className="whitespace-nowrap">Unavailable</span>
         </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 rounded-full bg-desk-booked border-2 border-orange-600"></div>
-          <span>Your Booking</span>
+        <div className="flex items-center space-x-1 sm:space-x-2">
+          <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-desk-booked border-2 border-orange-600"></div>
+          <span className="whitespace-nowrap">Your Booking</span>
         </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-blue-600"></div>
-          <span>Checked In</span>
+        <div className="flex items-center space-x-1 sm:space-x-2">
+          <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-blue-500 border-2 border-blue-600"></div>
+          <span className="whitespace-nowrap">Checked In</span>
         </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 rounded-full bg-desk-inactive border-2 border-gray-500"></div>
-          <span>Inactive</span>
+        <div className="flex items-center space-x-1 sm:space-x-2">
+          <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-desk-inactive border-2 border-gray-500"></div>
+          <span className="whitespace-nowrap">Inactive</span>
         </div>
       </div>
 

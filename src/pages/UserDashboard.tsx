@@ -210,21 +210,21 @@ const UserDashboard = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-white border-b border-border shadow-custom-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <div className="bg-gradient-primary p-2 rounded-lg">
-                <MapPin className="h-6 w-6 text-primary-foreground" />
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16 gap-2">
+            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
+              <div className="bg-gradient-primary p-1.5 sm:p-2 rounded-lg">
+                <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-primary">DeskFlow</h1>
-                <p className="text-sm text-muted-foreground">User Dashboard</p>
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-xl font-bold text-primary truncate">DeskFlow</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">User Dashboard</p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               {/* WiFi Status */}
-              <div className="flex items-center space-x-2">
+              <div className="hidden sm:flex items-center space-x-2">
                 {isConnectedToWifi ? (
                   <div className="flex items-center space-x-1 text-success">
                     <Wifi className="h-4 w-4" />
@@ -233,61 +233,76 @@ const UserDashboard = () => {
                 ) : (
                   <div className="flex items-center space-x-1 text-warning">
                     <WifiOff className="h-4 w-4" />
-                    <span className="text-sm font-medium">No Office WiFi</span>
+                    <span className="text-sm font-medium">No WiFi</span>
                   </div>
                 )}
               </div>
 
+              {/* Mobile WiFi Status */}
+              <div className="sm:hidden">
+                {isConnectedToWifi ? (
+                  <Wifi className="h-4 w-4 text-success" />
+                ) : (
+                  <WifiOff className="h-4 w-4 text-warning" />
+                )}
+              </div>
+
               <Link to="/profile">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="hidden sm:flex">
                   <User className="h-4 w-4 mr-2" />
                   Profile
                 </Button>
+                <Button variant="ghost" size="sm" className="sm:hidden p-2">
+                  <User className="h-4 w-4" />
+                </Button>
               </Link>
 
-              <Button variant="outline" size="sm" onClick={handleLogout}>
+              <Button variant="outline" size="sm" onClick={handleLogout} className="hidden sm:flex">
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleLogout} className="sm:hidden p-2">
+                <LogOut className="h-4 w-4" />
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Welcome Section */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-primary mb-2">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-primary mb-2">
             Welcome back, User!
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Manage your desk bookings and check your office visit analytics.
           </p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
           {stats.map((stat, index) => (
             <Card 
               key={stat.title}
               className="animate-fade-in hover:shadow-custom-md transition-all duration-300"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
+              <CardContent className="p-3 sm:p-4 lg:pt-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">
                       {stat.title}
                     </p>
-                    <p className="text-2xl font-bold text-primary">
+                    <p className="text-lg sm:text-2xl font-bold text-primary">
                       {stat.value}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground hidden sm:block">
                       {stat.description}
                     </p>
                   </div>
-                  <div className="bg-gradient-primary p-3 rounded-lg">
-                    <stat.icon className="h-6 w-6 text-primary-foreground" />
+                  <div className="bg-gradient-primary p-2 sm:p-3 rounded-lg shrink-0">
+                    <stat.icon className="h-4 w-4 sm:h-6 sm:w-6 text-primary-foreground" />
                   </div>
                 </div>
               </CardContent>
@@ -380,7 +395,7 @@ const UserDashboard = () => {
                   onFilterChange={setSelectedFilter}
                   deskCounts={getDeskCounts()}
                 />
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                   {getFilteredDesks().map((desk) => (
                     <DeskCard
                       key={desk.id}
@@ -414,7 +429,7 @@ const UserDashboard = () => {
                   onFilterChange={setSelectedFilter}
                   deskCounts={getDeskCounts()}
                 />
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                   {getFilteredDesks().map((office) => (
                     <DeskCard
                       key={office.id}

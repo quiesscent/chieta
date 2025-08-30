@@ -37,29 +37,29 @@ export const Navbar = () => {
           : "bg-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+        <div className="flex justify-between items-center h-14 sm:h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <div className="bg-gradient-primary p-2 rounded-lg">
-              <Building className="h-6 w-6 text-primary-foreground" />
+          <div className="flex items-center space-x-2 min-w-0">
+            <div className="bg-gradient-primary p-1.5 sm:p-2 rounded-lg">
+              <Building className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold text-primary">DeskFlow</span>
+            <span className="text-lg sm:text-xl font-bold text-primary truncate">DeskFlow</span>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
             {navItems.map((item) => (
               <button
                 key={item.label}
                 onClick={() => scrollToSection(item.href)}
-                className="text-foreground hover:text-primary transition-colors duration-200 font-medium"
+                className="text-foreground hover:text-primary transition-colors duration-200 font-medium whitespace-nowrap"
               >
                 {item.label}
               </button>
             ))}
             <Link to="/auth">
-              <Button variant="default" className="shadow-custom-sm">
+              <Button variant="default" className="shadow-custom-sm whitespace-nowrap">
                 Log In
               </Button>
             </Link>
@@ -71,29 +71,30 @@ export const Navbar = () => {
               variant="ghost"
               size="sm"
               onClick={() => setIsOpen(!isOpen)}
-              className="text-primary"
+              className="text-primary p-2"
+              aria-label="Toggle navigation menu"
             >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden bg-background border-t border-border animate-fade-in">
-            <div className="px-2 pt-2 pb-3 space-y-1">
+          <div className="md:hidden bg-background/95 backdrop-blur-lg border-t border-border animate-fade-in">
+            <div className="px-2 pt-2 pb-3 space-y-1 max-h-[calc(100vh-4rem)] overflow-y-auto">
               {navItems.map((item) => (
                 <button
                   key={item.label}
                   onClick={() => scrollToSection(item.href)}
-                  className="block w-full text-left px-3 py-2 text-foreground hover:text-primary transition-colors duration-200 font-medium"
+                  className="block w-full text-left px-3 py-3 text-foreground hover:text-primary hover:bg-secondary/20 transition-all duration-200 font-medium rounded-lg"
                 >
                   {item.label}
                 </button>
               ))}
               <div className="px-3 py-2">
                 <Link to="/auth">
-                  <Button variant="default" className="w-full">
+                  <Button variant="default" className="w-full" onClick={() => setIsOpen(false)}>
                     Log In
                   </Button>
                 </Link>

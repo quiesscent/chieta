@@ -25,19 +25,19 @@ export const DeskFilter = ({ selectedFilter, onFilterChange, deskCounts }: DeskF
   ];
 
   return (
-    <div className="flex flex-wrap gap-2 mb-6">
+    <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4 sm:mb-6">
       {filters.map((filter) => (
         <Button
           key={filter.key}
           variant={selectedFilter === filter.key ? "default" : "outline"}
           size="sm"
           onClick={() => onFilterChange(filter.key)}
-          className="flex items-center space-x-2"
+          className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
         >
-          <span>{filter.label}</span>
+          <span className="whitespace-nowrap">{filter.label}</span>
           <Badge 
             variant="secondary" 
-            className="ml-1 text-xs bg-white/20 text-current"
+            className="ml-0.5 sm:ml-1 text-xs bg-white/20 text-current px-1 py-0"
           >
             {filter.count}
           </Badge>
