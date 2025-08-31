@@ -329,77 +329,79 @@ const AdminDashboard = () => {
               )}
 
               {/* Employee List */}
-              <div className="space-y-3">
-                {employees.map((employee) => (
-                  <div 
-                    key={employee.id}
-                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 bg-secondary/10 rounded-lg gap-3 sm:gap-4"
-                  >
-                    <div className="flex items-center space-x-3 min-w-0 flex-1">
-                      <div className="bg-gradient-primary p-2 rounded-lg shrink-0">
-                        <User className="h-4 w-4 text-primary-foreground" />
+              <div className="overflow-x-auto">
+                <div className="space-y-3 min-w-full">
+                  {employees.map((employee) => (
+                    <div 
+                      key={employee.id}
+                      className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 bg-secondary/10 rounded-lg gap-3 sm:gap-4 min-w-0"
+                    >
+                      <div className="flex items-center space-x-3 min-w-0 flex-1">
+                        <div className="bg-gradient-primary p-2 rounded-lg shrink-0">
+                          <User className="h-4 w-4 text-primary-foreground" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-primary truncate">{employee.name}</p>
+                          <p className="text-sm text-muted-foreground truncate">{employee.email}</p>
+                          <p className="text-xs text-muted-foreground whitespace-nowrap">
+                            {employee.loginFrequency} logins this month
+                          </p>
+                        </div>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-primary truncate">{employee.name}</p>
-                        <p className="text-sm text-muted-foreground truncate">{employee.email}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {employee.loginFrequency} logins this month
-                        </p>
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto shrink-0">
+                        <Badge variant={employee.status === 'active' ? 'default' : 'secondary'} className="whitespace-nowrap">
+                          {employee.status}
+                        </Badge>
+                        <div className="flex gap-1 w-full sm:w-auto shrink-0">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleViewEmployee(employee)}
+                            className="text-xs px-2 py-1 h-7 whitespace-nowrap"
+                          >
+                            <Eye className="h-3 w-3 sm:mr-1" />
+                            <span className="hidden sm:inline">View</span>
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedEmployee(employee);
+                              setIsEmployeeUpdateModalOpen(true);
+                            }}
+                            className="text-xs px-2 py-1 h-7 whitespace-nowrap"
+                          >
+                            <Edit className="h-3 w-3 sm:mr-1" />
+                            <span className="hidden sm:inline">Edit</span>
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => {
+                              const csvData = prepareEmployeeHistoryData([employee]);
+                              downloadCSV(csvData, `${employee.name.replace(/\s+/g, '-').toLowerCase()}-history-${new Date().toISOString().split('T')[0]}`);
+                              toast({
+                                title: "Download Complete",
+                                description: `${employee.name}'s history has been downloaded.`,
+                              });
+                            }}
+                            className="text-xs px-2 py-1 h-7 whitespace-nowrap"
+                          >
+                            <Download className="h-3 w-3" />
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleRemoveEmployee(employee.id)}
+                            className="text-xs px-2 py-1 h-7 whitespace-nowrap"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
-                      <Badge variant={employee.status === 'active' ? 'default' : 'secondary'} className="whitespace-nowrap">
-                        {employee.status}
-                      </Badge>
-                      <div className="flex flex-wrap gap-1 w-full sm:w-auto">
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleViewEmployee(employee)}
-                          className="text-xs px-2 py-1 h-7 flex-1 sm:flex-none"
-                        >
-                          <Eye className="h-3 w-3 sm:mr-1" />
-                          <span className="hidden sm:inline">View</span>
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedEmployee(employee);
-                            setIsEmployeeUpdateModalOpen(true);
-                          }}
-                          className="text-xs px-2 py-1 h-7 flex-1 sm:flex-none"
-                        >
-                          <Edit className="h-3 w-3 sm:mr-1" />
-                          <span className="hidden sm:inline">Edit</span>
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => {
-                            const csvData = prepareEmployeeHistoryData([employee]);
-                            downloadCSV(csvData, `${employee.name.replace(/\s+/g, '-').toLowerCase()}-history-${new Date().toISOString().split('T')[0]}`);
-                            toast({
-                              title: "Download Complete",
-                              description: `${employee.name}'s history has been downloaded.`,
-                            });
-                          }}
-                          className="text-xs px-2 py-1 h-7 flex-1 sm:flex-none"
-                        >
-                          <Download className="h-3 w-3" />
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleRemoveEmployee(employee.id)}
-                          className="text-xs px-2 py-1 h-7 flex-1 sm:flex-none"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>
