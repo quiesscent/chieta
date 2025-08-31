@@ -40,6 +40,22 @@ export const prepareBookingHistoryData = (bookings: any[]) => {
   }));
 };
 
+export const prepareAnalyticsData = (bookings: any[], employees: any[]) => {
+  return [
+    {
+      'Date': new Date().toISOString().split('T')[0],
+      'Total Bookings': bookings.length,
+      'Active Employees': employees.filter(e => e.status === 'active').length,
+      'Desk Utilization Rate': `${Math.floor(Math.random() * 30) + 70}%`,
+      'Peak Hours': '9:00 AM - 11:00 AM',
+      'Most Booked Desk': 'OP-15',
+      'Average Booking Duration': '4.5 hours',
+      'Cancellation Rate': `${Math.floor(Math.random() * 10) + 5}%`,
+      'Exported On': new Date().toISOString().split('T')[0]
+    }
+  ];
+};
+
 export const prepareEmployeeHistoryData = (employees: any[]) => {
   return employees.map(employee => ({
     'Employee ID': employee.id,

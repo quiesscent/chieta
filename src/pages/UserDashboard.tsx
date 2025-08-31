@@ -13,7 +13,7 @@ import { BookingCancelModal } from "@/components/dashboard/BookingCancelModal";
 import { CheckInModal } from "@/components/dashboard/CheckInModal";
 import { Footer } from "@/components/ui/footer";
 import { useToast } from "@/hooks/use-toast";
-import { downloadCSV, prepareBookingHistoryData } from "@/utils/csvExport";
+import { downloadCSV, prepareBookingHistoryData, prepareAnalyticsData } from "@/utils/csvExport";
 import chietaLogo from "@/assets/chieta-logo.png";
 import { 
   Calendar, 
@@ -310,8 +310,8 @@ const UserDashboard = () => {
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16 gap-2">
             <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
-              <div className="bg-gradient-primary p-1.5 sm:p-2 rounded-lg">
-                <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
+              <div className="bg-secondary p-1.5 sm:p-2 rounded-lg">
+                <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-secondary-foreground" />
               </div>
               <div className="min-w-0">
                 <h1 className="text-lg sm:text-xl font-bold text-primary truncate">Chieta Desk System</h1>
@@ -398,8 +398,8 @@ const UserDashboard = () => {
                       {stat.description}
                     </p>
                   </div>
-                  <div className="bg-gradient-primary p-2 sm:p-3 rounded-lg shrink-0">
-                    <stat.icon className="h-4 w-4 sm:h-6 sm:w-6 text-primary-foreground" />
+                  <div className="bg-secondary p-2 sm:p-3 rounded-lg shrink-0">
+                    <stat.icon className="h-4 w-4 sm:h-6 sm:w-6 text-secondary-foreground" />
                   </div>
                 </div>
               </CardContent>
@@ -493,7 +493,7 @@ const UserDashboard = () => {
                                  size="sm" 
                                  variant="default"
                                  onClick={() => handleReservedBookingClick(booking)}
-                                 className="text-xs bg-gradient-primary"
+                                 className="text-xs bg-primary text-primary-foreground"
                                >
                                  Check In
                                </Button>

@@ -41,10 +41,10 @@ export const Navbar = () => {
         <div className="flex justify-between items-center h-14 sm:h-16">
           {/* Logo */}
           <div className="flex items-center space-x-2 min-w-0">
-            <div className="bg-gradient-primary p-1.5 sm:p-2 rounded-lg">
-              <Building className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
+            <div className="bg-secondary p-1.5 sm:p-2 rounded-lg">
+              <img src="/public/lovable-uploads/252dba30-18a2-4579-82c1-e978088cdef6.png" alt="Chieta Logo" className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
-            <span className="text-lg sm:text-xl font-bold text-primary truncate">DeskFlow</span>
+            <span className="text-lg sm:text-xl font-bold text-primary truncate">Chieta Desk System</span>
           </div>
 
           {/* Desktop Navigation */}

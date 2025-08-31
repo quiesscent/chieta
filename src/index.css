@@ -2,35 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
-/* DeskFlow Design System - Navy Blue & White Theme */
+/* Chieta Desk System - Purple & Gold Theme */
 
 @layer base {
   :root {
-    /* Base Colors - Navy Blue & White Theme */
+    /* Base Colors - CHIETA Brand Colors */
     --background: 0 0% 100%;
-    --foreground: 220 100% 15%;
+    --foreground: 259 47% 24%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 100% 15%;
+    --card-foreground: 259 47% 24%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 100% 15%;
+    --popover-foreground: 259 47% 24%;
 
-    /* Primary - Navy Blue */
-    --primary: 220 100% 20%;
+    /* Primary - CHIETA Purple */
+    --primary: 259 47% 24%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 220 80% 35%;
-    --primary-dark: 220 100% 12%;
+    --primary-light: 259 30% 40%;
+    --primary-dark: 259 60% 15%;
 
-    /* Secondary - Light Navy */
-    --secondary: 220 30% 96%;
-    --secondary-foreground: 220 100% 20%;
+    /* Secondary - CHIETA Gold */
+    --secondary: 36 70% 55%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 20% 95%;
-    --muted-foreground: 220 30% 45%;
+    --muted: 36 20% 95%;
+    --muted-foreground: 259 20% 45%;
 
-    --accent: 220 60% 88%;
-    --accent-foreground: 220 100% 20%;
+    --accent: 36 40% 88%;
+    --accent-foreground: 259 47% 24%;
 
     /* Status Colors */
     --success: 142 76% 36%;
@@ -46,16 +46,13 @@
     --desk-booked: 38 92% 50%;
     --desk-inactive: 220 10% 60%;
 
-    --border: 220 30% 90%;
-    --input: 220 30% 94%;
-    --ring: 220 100% 20%;
+    --border: 259 20% 90%;
+    --input: 259 20% 94%;
+    --ring: 259 47% 24%;
 
     --radius: 0.75rem;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
-    --gradient-hero: linear-gradient(135deg, hsl(var(--primary-dark)), hsl(var(--primary)));
-    --gradient-card: linear-gradient(145deg, hsl(var(--background)), hsl(var(--secondary)));
+    /* Solid backgrounds - No gradients */
 
     /* Shadows */
     --shadow-sm: 0 2px 4px -1px hsl(var(--primary) / 0.1);
@@ -139,12 +136,12 @@
 
 @layer components {
   /* Hero styles */
-  .hero-gradient {
-    background: var(--gradient-hero);
+  .hero-background {
+    background: hsl(var(--primary));
   }
 
-  .card-gradient {
-    background: var(--gradient-card);
+  .card-background {
+    background: hsl(var(--card));
   }
 
   /* Custom animations */
