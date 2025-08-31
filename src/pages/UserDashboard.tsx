@@ -10,7 +10,11 @@ import { DeskFilter } from "@/components/dashboard/DeskFilter";
 import { BookingConfirmationModal } from "@/components/dashboard/BookingConfirmationModal";
 import { BookingRescheduleModal } from "@/components/dashboard/BookingRescheduleModal";
 import { BookingCancelModal } from "@/components/dashboard/BookingCancelModal";
+import { CheckInModal } from "@/components/dashboard/CheckInModal";
+import { Footer } from "@/components/ui/footer";
 import { useToast } from "@/hooks/use-toast";
+import { downloadCSV, prepareBookingHistoryData } from "@/utils/csvExport";
+import chietaLogo from "@/assets/chieta-logo.png";
 import { 
   Calendar, 
   MapPin, 
@@ -30,6 +34,7 @@ const UserDashboard = () => {
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [bookingDetails, setBookingDetails] = useState<any>(null);
   const [isConnectedToWifi, setIsConnectedToWifi] = useState(false);
@@ -213,6 +218,31 @@ const UserDashboard = () => {
     });
   };
 
+  const handleReservedBookingClick = (booking: any) => {
+    setSelectedBooking(booking);
+    setIsCheckInModalOpen(true);
+  };
+
+  const handleCheckIn = (bookingId: string) => {
+    setUserBookings(prevBookings => 
+      prevBookings.map(booking => 
+        booking.id === bookingId 
+          ? { ...booking, status: 'checked-in' }
+          : booking
+      )
+    );
+    setIsCheckInModalOpen(false);
+  };
+
+  const handleDownloadCSV = () => {
+    const csvData = prepareBookingHistoryData(userBookings);
+    downloadCSV(csvData, `chieta-desk-bookings-${new Date().toISOString().split('T')[0]}`);
+    toast({
+      title: "Download Complete",
+      description: "Your booking history has been downloaded as CSV.",
+    });
+  };
+
   // Filter functions
   const getCurrentDesks = () => {
     return activeTab === "open-floor" ? openFloorDesks : executiveOffices;
@@ -284,7 +314,7 @@ const UserDashboard = () => {
                 <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg sm:text-xl font-bold text-primary truncate">DeskFlow</h1>
+                <h1 className="text-lg sm:text-xl font-bold text-primary truncate">Chieta Desk System</h1>
                 <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">User Dashboard</p>
               </div>
             </div>
@@ -452,30 +482,40 @@ const UserDashboard = () => {
                           <Badge variant="secondary" className="w-fit">
                             Reserved {isConnectedToWifi ? '• Can Check In' : '• Need WiFi'}
                           </Badge>
-                          <div className="flex space-x-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => {
-                                setSelectedBooking(booking);
-                                setIsRescheduleModalOpen(true);
-                              }}
-                              className="text-xs"
-                            >
-                              Reschedule
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => {
-                                setSelectedBooking(booking);
-                                setIsCancelModalOpen(true);
-                              }}
-                              className="text-xs text-destructive hover:text-destructive"
-                            >
-                              Cancel
-                            </Button>
-                          </div>
+                           <div className="flex space-x-2">
+                             {booking.status === 'reserved' && (
+                               <Button 
+                                 size="sm" 
+                                 variant="default"
+                                 onClick={() => handleReservedBookingClick(booking)}
+                                 className="text-xs bg-gradient-primary"
+                               >
+                                 Check In
+                               </Button>
+                             )}
+                             <Button 
+                               size="sm" 
+                               variant="outline"
+                               onClick={() => {
+                                 setSelectedBooking(booking);
+                                 setIsRescheduleModalOpen(true);
+                               }}
+                               className="text-xs"
+                             >
+                               Reschedule
+                             </Button>
+                             <Button 
+                               size="sm" 
+                               variant="outline"
+                               onClick={() => {
+                                 setSelectedBooking(booking);
+                                 setIsCancelModalOpen(true);
+                               }}
+                               className="text-xs text-destructive hover:text-destructive"
+                             >
+                               Cancel
+                             </Button>
+                           </div>
                         </div>
                       </div>
                     ))}
@@ -494,7 +534,18 @@ const UserDashboard = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="history" className="space-y-3 mt-4">
+                <TabsContent value="history" className="space-y-3 mt-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-2 sm:space-y-0">
+                  <h3 className="text-lg font-semibold text-primary">Booking History</h3>
+                  <Button 
+                    onClick={handleDownloadCSV}
+                    variant="outline" 
+                    size="sm"
+                    className="self-start sm:self-auto"
+                  >
+                    Download CSV
+                  </Button>
+                </div>
                 {userBookings.filter(b => b.status === 'completed' || b.status === 'cancelled').length > 0 ? (
                   <div className="space-y-3 max-h-64 overflow-y-auto">
                     {userBookings.filter(b => b.status === 'completed' || b.status === 'cancelled').map((booking) => (
@@ -664,6 +715,15 @@ const UserDashboard = () => {
         booking={selectedBooking}
         onCancel={handleBookingCancel}
       />
+
+      <CheckInModal
+        isOpen={isCheckInModalOpen}
+        onClose={() => setIsCheckInModalOpen(false)}
+        booking={selectedBooking}
+        onCheckIn={handleCheckIn}
+      />
+
+      <Footer />
     </div>
   );
 };

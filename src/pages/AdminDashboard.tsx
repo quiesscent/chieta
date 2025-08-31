@@ -6,8 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DeskManagementModal } from "@/components/dashboard/DeskManagementModal";
 import { EmployeeDetailsModal } from "@/components/dashboard/EmployeeDetailsModal";
+import { EmployeeUpdateModal } from "@/components/dashboard/EmployeeUpdateModal";
 import { AnalyticsDashboard } from "@/components/dashboard/AnalyticsDashboard";
+import { Footer } from "@/components/ui/footer";
 import { useToast } from "@/hooks/use-toast";
+import { downloadCSV, prepareEmployeeHistoryData } from "@/utils/csvExport";
 import { 
   Users, 
   MapPin, 
@@ -44,6 +47,7 @@ const AdminDashboard = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [isDeskModalOpen, setIsDeskModalOpen] = useState(false);
   const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
+  const [isEmployeeUpdateModalOpen, setIsEmployeeUpdateModalOpen] = useState(false);
 
   // Sample desk data for management
   const [desks, setDesks] = useState(
@@ -471,6 +475,19 @@ const AdminDashboard = () => {
         employee={selectedEmployee}
         onStatusUpdate={handleEmployeeStatusUpdate}
       />
+
+      <EmployeeUpdateModal
+        isOpen={isEmployeeUpdateModalOpen}
+        onClose={() => setIsEmployeeUpdateModalOpen(false)}
+        employee={selectedEmployee}
+        onUpdate={(employeeId, updatedData) => {
+          setEmployees(prev => prev.map(emp => 
+            emp.id === employeeId ? { ...emp, ...updatedData } : emp
+          ));
+        }}
+      />
+
+      <Footer />
     </div>
   );
 };
