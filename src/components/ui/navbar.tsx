@@ -42,7 +42,7 @@ export const Navbar = () => {
           {/* Logo */}
           <div className="flex items-center space-x-2 min-w-0">
             <div className="bg-secondary p-1.5 sm:p-2 rounded-lg">
-              <img src="/public/lovable-uploads/252dba30-18a2-4579-82c1-e978088cdef6.png" alt="Chieta Logo" className="h-5 w-5 sm:h-6 sm:w-6" />
+              <img src={require("@/assets/chieta-logo.jpeg")} alt="Chieta Logo" className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
             <span className="text-lg sm:text-xl font-bold text-primary truncate">Chieta Desk System</span>
           </div>

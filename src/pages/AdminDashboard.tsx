@@ -11,10 +11,10 @@ import { AnalyticsDashboard } from "@/components/dashboard/AnalyticsDashboard";
 import { Footer } from "@/components/ui/footer";
 import { useToast } from "@/hooks/use-toast";
 import { downloadCSV, prepareEmployeeHistoryData } from "@/utils/csvExport";
-import { 
-  Users, 
-  MapPin, 
-  TrendingUp, 
+import {
+  Users,
+  MapPin,
+  TrendingUp,
   Settings,
   LogOut,
   User,
@@ -25,6 +25,7 @@ import {
   Eye,
   Download
 } from "lucide-react";
+import chietaLogo from "@/assets/chieta-logo.jpeg";
 import { Link, useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
@@ -176,11 +177,14 @@ const AdminDashboard = () => {
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16 gap-2">
             <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
-              <div className="bg-gradient-primary p-1.5 sm:p-2 rounded-lg">
+              <div className="bg-gradient-primary p-1.5 sm:p-2 rounded-lg flex items-center">
+                <img src={chietaLogo} alt="Chieta Logo" className="h-6 w-6 mr-2" />
                 <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg sm:text-xl font-bold text-primary truncate">Chieta Desk System</h1>
+                <h1 className="text-lg sm:text-xl font-bold text-primary truncate flex items-center">
+                  Chieta Desk System
+                </h1>
                 <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Administration Dashboard</p>
               </div>
             </div>

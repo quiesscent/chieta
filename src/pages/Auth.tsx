@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Building } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import chietaLogo from "@/assets/chieta-logo.png";
+import chietaLogo from "@/assets/chieta-logo.jpeg";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
