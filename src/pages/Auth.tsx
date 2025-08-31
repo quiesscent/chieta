@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Building, ArrowLeft } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Building } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import chietaLogo from "@/assets/chieta-logo.png";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -76,22 +77,17 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
+    <div className={`min-h-screen flex items-center justify-center p-4 transition-all duration-500 ${
+      isLogin ? 'bg-background' : 'bg-primary/5'
+    }`}>
       <div className="w-full max-w-md">
-        {/* Back to home button */}
-        <Link 
-          to="/" 
-          className="inline-flex items-center text-white/80 hover:text-white mb-6 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Home
-        </Link>
-
-        <Card className="bg-white/95 backdrop-blur-sm shadow-custom-xl animate-scale-in">
+        <Card className={`shadow-custom-xl animate-scale-in transition-all duration-300 ${
+          isLogin ? 'bg-card' : 'bg-secondary/50 backdrop-blur-sm'
+        }`}>
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
-              <div className="bg-gradient-primary p-3 rounded-lg animate-bounce-in">
-                <Building className="h-8 w-8 text-primary-foreground" />
+              <div className="bg-primary/10 p-2 rounded-lg animate-bounce-in">
+                <img src={chietaLogo} alt="CHIETA Logo" className="h-12 w-auto" />
               </div>
             </div>
             <CardTitle className="text-2xl font-bold text-primary animate-fade-in">
@@ -99,8 +95,8 @@ const Auth = () => {
             </CardTitle>
             <p className="text-muted-foreground animate-fade-in" style={{ animationDelay: '0.2s' }}>
               {isLogin 
-                ? "Sign in to access your DeskFlow dashboard" 
-                : "Join DeskFlow to manage your workspace"
+                ? "Sign in to access your Chieta Desk System dashboard" 
+                : "Join Chieta Desk System to manage your workspace"
               }
             </p>
           </CardHeader>
@@ -174,7 +170,11 @@ const Auth = () => {
                 type="submit" 
                 loading={isSubmitting}
                 disabled={isSubmitting}
-                className="w-full bg-gradient-primary hover:shadow-custom-md animate-slide-up"
+                className={`w-full animate-slide-up ${
+                  isLogin 
+                    ? 'bg-primary hover:bg-primary/90 text-primary-foreground' 
+                    : 'bg-secondary hover:bg-secondary/90 text-secondary-foreground'
+                }`}
                 size="lg"
                 style={{ animationDelay: '0.5s' }}
               >
@@ -184,7 +184,7 @@ const Auth = () => {
 
             {/* Demo credentials */}
             {isLogin && (
-              <div className="mt-6 p-4 bg-gradient-card rounded-lg animate-fade-in border border-primary/10" style={{ animationDelay: '0.6s' }}>
+              <div className="mt-6 p-4 bg-primary/5 rounded-lg animate-fade-in border border-primary/20" style={{ animationDelay: '0.6s' }}>
                 <p className="text-sm font-semibold text-primary mb-2">Demo Credentials:</p>
                 <div className="text-xs text-muted-foreground space-y-1">
                   <div>User: user@demo.com / user123</div>
