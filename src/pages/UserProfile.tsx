@@ -18,6 +18,7 @@ import {
   BarChart3
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Footer } from "@/components/ui/footer";
 
 const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
