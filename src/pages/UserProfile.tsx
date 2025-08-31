@@ -193,15 +193,13 @@ const UserProfile = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Profile Picture */}
-                <div className="text-center">
-                  <div className="w-24 h-24 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                    <User className="h-12 w-12 text-primary-foreground" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-primary">
+                {/* Profile Header - No Avatar */}
+                <div className="text-center pb-4 border-b border-border">
+                  <h3 className="text-xl font-semibold text-primary">
                     {profileData.name}
                   </h3>
-                  <p className="text-muted-foreground">{profileData.username}</p>
+                  <p className="text-muted-foreground">@{profileData.username}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{profileData.companyNumber}</p>
                 </div>
 
                 {/* Profile Fields */}

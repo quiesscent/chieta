@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DeskManagementModal } from "@/components/dashboard/DeskManagementModal";
+import { EmployeeDetailsModal } from "@/components/dashboard/EmployeeDetailsModal";
+import { AnalyticsDashboard } from "@/components/dashboard/AnalyticsDashboard";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Users, 
@@ -16,7 +18,8 @@ import {
   Plus,
   Trash2,
   Edit,
-  Activity
+  Activity,
+  Eye
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -38,7 +41,9 @@ const AdminDashboard = () => {
   const [newEmployee, setNewEmployee] = useState({ name: "", email: "" });
   const [isAddingEmployee, setIsAddingEmployee] = useState(false);
   const [selectedDesk, setSelectedDesk] = useState<any>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [isDeskModalOpen, setIsDeskModalOpen] = useState(false);
+  const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
 
   // Sample desk data for management
   const [desks, setDesks] = useState(
@@ -90,6 +95,21 @@ const AdminDashboard = () => {
       title: "Employee Removed",
       description: `${employee?.name} has been removed from the system.`,
     });
+  };
+
+  const handleEmployeeStatusUpdate = (employeeId: string, newStatus: string) => {
+    setEmployees(prev => 
+      prev.map(emp => 
+        emp.id === employeeId 
+          ? { ...emp, status: newStatus }
+          : emp
+      )
+    );
+  };
+
+  const handleViewEmployee = (employee: any) => {
+    setSelectedEmployee(employee);
+    setIsEmployeeModalOpen(true);
   };
 
   const handleDeskClick = (desk: any) => {
@@ -224,7 +244,23 @@ const AdminDashboard = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+          {/* Analytics Dashboard */}
+          <div className="xl:col-span-2">
+            <Card className="shadow-custom-md">
+              <CardHeader>
+                <CardTitle className="text-xl font-bold text-primary">
+                  Analytics Dashboard
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AnalyticsDashboard />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
           {/* Employee Management */}
           <Card className="shadow-custom-md">
             <CardHeader>
@@ -313,9 +349,19 @@ const AdminDashboard = () => {
                       <Button 
                         size="sm" 
                         variant="outline"
-                        onClick={() => handleRemoveEmployee(employee.id)}
+                        onClick={() => handleViewEmployee(employee)}
+                        className="text-xs"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Eye className="h-3 w-3 mr-1" />
+                        View
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleRemoveEmployee(employee.id)}
+                        className="text-xs"
+                      >
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>
@@ -413,6 +459,17 @@ const AdminDashboard = () => {
         }}
         desk={selectedDesk}
         onStatusUpdate={handleDeskStatusUpdate}
+      />
+
+      {/* Employee Details Modal */}
+      <EmployeeDetailsModal
+        isOpen={isEmployeeModalOpen}
+        onClose={() => {
+          setIsEmployeeModalOpen(false);
+          setSelectedEmployee(null);
+        }}
+        employee={selectedEmployee}
+        onStatusUpdate={handleEmployeeStatusUpdate}
       />
     </div>
   );

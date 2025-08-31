@@ -8,6 +8,8 @@ import { BookingModal } from "@/components/dashboard/BookingModal";
 import { DeskCard } from "@/components/dashboard/DeskCard";
 import { DeskFilter } from "@/components/dashboard/DeskFilter";
 import { BookingConfirmationModal } from "@/components/dashboard/BookingConfirmationModal";
+import { BookingRescheduleModal } from "@/components/dashboard/BookingRescheduleModal";
+import { BookingCancelModal } from "@/components/dashboard/BookingCancelModal";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Calendar, 
@@ -26,39 +28,78 @@ const UserDashboard = () => {
   const [selectedDeskType, setSelectedDeskType] = useState<'desk' | 'office'>('desk');
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [bookingDetails, setBookingDetails] = useState<any>(null);
   const [isConnectedToWifi, setIsConnectedToWifi] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("open-floor");
+  const [activeBookingTab, setActiveBookingTab] = useState("current");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [userBookings, setUserBookings] = useState([
-    { id: "1", deskId: "D-15", date: "2024-01-15", status: "checked-in", type: "desk" },
-    { id: "2", deskId: "D-22", date: "2024-01-14", status: "completed", type: "desk" },
-    { id: "3", deskId: "E-02", date: "2024-01-16", status: "reserved", type: "office" },
+    { id: "1", deskId: "OP-15", date: "2024-01-15", time: "09:30", status: "checked-in", type: "desk" },
+    { id: "2", deskId: "OP-22", date: "2024-01-16", time: "10:00", status: "reserved", type: "desk" },
+    { id: "3", deskId: "E-02", date: "2024-01-17", time: "14:00", status: "reserved", type: "office" },
+    { id: "4", deskId: "OP-08", date: "2024-01-14", time: "09:00", status: "completed", type: "desk" },
+    { id: "5", deskId: "OP-33", date: "2024-01-13", time: "13:30", status: "completed", type: "desk" },
+    { id: "6", deskId: "E-01", date: "2024-01-12", time: "11:00", status: "cancelled", type: "office" },
   ]);
   
-  // Sample desk data for open floor plan
+  // Sample desk data for open floor plan - Updated to match OP format
   const openFloorDesks = [
-    { id: "D-01", type: "desk" as const, status: "available" as const },
-    { id: "D-02", type: "desk" as const, status: "unavailable" as const },
-    { id: "D-03", type: "desk" as const, status: "available" as const },
-    { id: "D-04", type: "desk" as const, status: "reserved" as const },
-    { id: "D-05", type: "desk" as const, status: "available" as const },
-    { id: "D-06", type: "desk" as const, status: "checked-in" as const },
-    { id: "D-07", type: "desk" as const, status: "inactive" as const },
-    { id: "D-08", type: "desk" as const, status: "available" as const },
-    { id: "D-09", type: "desk" as const, status: "available" as const },
-    { id: "D-10", type: "desk" as const, status: "booked" as const },
-    { id: "D-11", type: "desk" as const, status: "available" as const },
-    { id: "D-12", type: "desk" as const, status: "available" as const },
-    { id: "D-13", type: "desk" as const, status: "reserved" as const },
-    { id: "D-14", type: "desk" as const, status: "available" as const },
-    { id: "D-15", type: "desk" as const, status: "checked-in" as const },
-    { id: "D-16", type: "desk" as const, status: "available" as const },
-    { id: "D-17", type: "desk" as const, status: "available" as const },
-    { id: "D-18", type: "desk" as const, status: "inactive" as const },
-    { id: "D-19", type: "desk" as const, status: "available" as const },
-    { id: "D-20", type: "desk" as const, status: "available" as const },
+    { id: "OP-01", type: "desk" as const, status: "available" as const },
+    { id: "OP-02", type: "desk" as const, status: "unavailable" as const },
+    { id: "OP-03", type: "desk" as const, status: "available" as const },
+    { id: "OP-04", type: "desk" as const, status: "reserved" as const },
+    { id: "OP-05", type: "desk" as const, status: "available" as const },
+    { id: "OP-06", type: "desk" as const, status: "checked-in" as const },
+    { id: "OP-07", type: "desk" as const, status: "inactive" as const },
+    { id: "OP-08", type: "desk" as const, status: "available" as const },
+    { id: "OP-09", type: "desk" as const, status: "available" as const },
+    { id: "OP-10", type: "desk" as const, status: "booked" as const },
+    { id: "OP-11", type: "desk" as const, status: "available" as const },
+    { id: "OP-12", type: "desk" as const, status: "available" as const },
+    { id: "OP-13", type: "desk" as const, status: "reserved" as const },
+    { id: "OP-14", type: "desk" as const, status: "available" as const },
+    { id: "OP-15", type: "desk" as const, status: "checked-in" as const },
+    { id: "OP-16", type: "desk" as const, status: "available" as const },
+    { id: "OP-17", type: "desk" as const, status: "available" as const },
+    { id: "OP-18", type: "desk" as const, status: "inactive" as const },
+    { id: "OP-19", type: "desk" as const, status: "available" as const },
+    { id: "OP-20", type: "desk" as const, status: "available" as const },
+    { id: "OP-21", type: "desk" as const, status: "unavailable" as const },
+    { id: "OP-22", type: "desk" as const, status: "reserved" as const },
+    { id: "OP-23", type: "desk" as const, status: "available" as const },
+    { id: "OP-24", type: "desk" as const, status: "available" as const },
+    { id: "OP-25", type: "desk" as const, status: "available" as const },
+    { id: "OP-26", type: "desk" as const, status: "booked" as const },
+    { id: "OP-27", type: "desk" as const, status: "available" as const },
+    { id: "OP-28", type: "desk" as const, status: "inactive" as const },
+    { id: "OP-29", type: "desk" as const, status: "available" as const },
+    { id: "OP-30", type: "desk" as const, status: "available" as const },
+    { id: "OP-31", type: "desk" as const, status: "available" as const },
+    { id: "OP-32", type: "desk" as const, status: "unavailable" as const },
+    { id: "OP-33", type: "desk" as const, status: "available" as const },
+    { id: "OP-34", type: "desk" as const, status: "available" as const },
+    { id: "OP-35", type: "desk" as const, status: "available" as const },
+    { id: "OP-36", type: "desk" as const, status: "available" as const },
+    { id: "OP-37", type: "desk" as const, status: "available" as const },
+    { id: "OP-38", type: "desk" as const, status: "available" as const },
+    { id: "OP-39", type: "desk" as const, status: "available" as const },
+    { id: "OP-40", type: "desk" as const, status: "booked" as const },
+    { id: "OP-41", type: "desk" as const, status: "available" as const },
+    { id: "OP-42", type: "desk" as const, status: "available" as const },
+    { id: "OP-43", type: "desk" as const, status: "available" as const },
+    { id: "OP-44", type: "desk" as const, status: "unavailable" as const },
+    { id: "OP-45", type: "desk" as const, status: "available" as const },
+    { id: "OP-46", type: "desk" as const, status: "available" as const },
+    { id: "OP-47", type: "desk" as const, status: "available" as const },
+    { id: "OP-48", type: "desk" as const, status: "available" as const },
+    { id: "OP-49", type: "desk" as const, status: "unavailable" as const },
+    { id: "OP-50", type: "desk" as const, status: "available" as const },
+    { id: "OP-51", type: "desk" as const, status: "available" as const },
+    { id: "OP-52", type: "desk" as const, status: "available" as const },
   ];
 
   // Sample executive office data
@@ -127,6 +168,7 @@ const UserDashboard = () => {
       id: Date.now().toString(),
       deskId,
       date,
+      time,
       status: 'reserved' as const,
       type
     };
@@ -144,6 +186,31 @@ const UserDashboard = () => {
     setIsBookingModalOpen(false);
     setSelectedDesk(null);
     setIsConfirmationModalOpen(true);
+  };
+
+  const handleBookingReschedule = (bookingId: string, newDate: string, newTime: string) => {
+    setUserBookings(prev => 
+      prev.map(booking => 
+        booking.id === bookingId 
+          ? { ...booking, date: newDate, time: newTime }
+          : booking
+      )
+    );
+    
+    toast({
+      title: "Booking Rescheduled",
+      description: "Your booking has been successfully rescheduled.",
+    });
+  };
+
+  const handleBookingCancel = (bookingId: string) => {
+    const booking = userBookings.find(b => b.id === bookingId);
+    setUserBookings(prev => prev.filter(b => b.id !== bookingId));
+    
+    toast({
+      title: "Booking Cancelled",
+      description: `Your booking for ${booking?.deskId} has been cancelled.`,
+    });
   };
 
   // Filter functions
@@ -310,53 +377,161 @@ const UserDashboard = () => {
           ))}
         </div>
 
-        {/* Current Bookings */}
+        {/* Current Bookings with Tabs */}
         <Card className="mb-8 shadow-custom-md">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-primary">
-              Your Current Bookings
+              Your Bookings
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {userBookings.length > 0 ? (
-              <div className="space-y-3">
-                {userBookings.map((booking) => (
-                  <div 
-                    key={booking.id}
-                    className="flex items-center justify-between p-4 bg-secondary/20 rounded-lg"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <div className="bg-gradient-primary p-2 rounded-lg">
-                        <MapPin className="h-4 w-4 text-primary-foreground" />
+            <Tabs value={activeBookingTab} onValueChange={setActiveBookingTab}>
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="current">Current</TabsTrigger>
+                <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+                <TabsTrigger value="history">History</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="current" className="space-y-3 mt-4">
+                {userBookings.filter(b => b.status === 'checked-in').length > 0 ? (
+                  <div className="space-y-3">
+                    {userBookings.filter(b => b.status === 'checked-in').map((booking) => (
+                      <div 
+                        key={booking.id}
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-2 sm:space-y-0"
+                      >
+                        <div className="flex items-center space-x-4">
+                          <div className="bg-blue-500 p-2 rounded-lg">
+                            <MapPin className="h-4 w-4 text-white" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-primary">
+                              Desk {booking.deskId}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {booking.date} at {booking.time}
+                            </p>
+                          </div>
+                        </div>
+                        <Badge variant="default">
+                          Currently Checked In
+                        </Badge>
                       </div>
-                      <div>
-                        <p className="font-semibold text-primary">
-                          Desk {booking.deskId}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {booking.date}
-                        </p>
-                      </div>
-                    </div>
-                    <Badge 
-                      variant={
-                        booking.status === 'checked-in' ? 'default' :
-                        booking.status === 'reserved' ? 'secondary' :
-                        'outline'
-                      }
-                    >
-                      {booking.status === 'checked-in' ? 'Checked In' :
-                       booking.status === 'reserved' ? 'Reserved' :
-                       'Completed'}
-                    </Badge>
+                    ))}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-muted-foreground text-center py-8">
-                No current bookings. Select a desk from the floor plan to book!
-              </p>
-            )}
+                ) : (
+                  <p className="text-muted-foreground text-center py-8">
+                    No current bookings. You're not checked in anywhere.
+                  </p>
+                )}
+              </TabsContent>
+
+              <TabsContent value="upcoming" className="space-y-3 mt-4">
+                {userBookings.filter(b => b.status === 'reserved').length > 0 ? (
+                  <div className="space-y-3">
+                    {userBookings.filter(b => b.status === 'reserved').map((booking) => (
+                      <div 
+                        key={booking.id}
+                        className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-4 bg-orange-50 border border-orange-200 rounded-lg space-y-3 lg:space-y-0"
+                      >
+                        <div className="flex items-center space-x-4">
+                          <div className="bg-orange-500 p-2 rounded-lg">
+                            <MapPin className="h-4 w-4 text-white" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-primary">
+                              Desk {booking.deskId}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {booking.date} at {booking.time}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 lg:items-center">
+                          <Badge variant="secondary" className="w-fit">
+                            Reserved {isConnectedToWifi ? '• Can Check In' : '• Need WiFi'}
+                          </Badge>
+                          <div className="flex space-x-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedBooking(booking);
+                                setIsRescheduleModalOpen(true);
+                              }}
+                              className="text-xs"
+                            >
+                              Reschedule
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedBooking(booking);
+                                setIsCancelModalOpen(true);
+                              }}
+                              className="text-xs text-destructive hover:text-destructive"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {!isConnectedToWifi && (
+                      <div className="mt-4 p-3 bg-warning/10 border border-warning/20 rounded-lg">
+                        <p className="text-sm text-warning-foreground">
+                          <strong>Connect to office WiFi</strong> to automatically check in to your reserved desks.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-8">
+                    No upcoming bookings. Book a desk from the floor plan below!
+                  </p>
+                )}
+              </TabsContent>
+
+              <TabsContent value="history" className="space-y-3 mt-4">
+                {userBookings.filter(b => b.status === 'completed' || b.status === 'cancelled').length > 0 ? (
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    {userBookings.filter(b => b.status === 'completed' || b.status === 'cancelled').map((booking) => (
+                      <div 
+                        key={booking.id}
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-secondary/10 rounded-lg space-y-2 sm:space-y-0"
+                      >
+                        <div className="flex items-center space-x-4">
+                          <div className={`p-2 rounded-lg ${
+                            booking.status === 'completed' ? 'bg-green-500' : 'bg-red-500'
+                          }`}>
+                            <MapPin className="h-4 w-4 text-white" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-primary">
+                              Desk {booking.deskId}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {booking.date} at {booking.time}
+                            </p>
+                          </div>
+                        </div>
+                        <Badge 
+                          variant={booking.status === 'completed' ? 'outline' : 'destructive'}
+                        >
+                          {booking.status === 'completed' ? 'Completed' : 'Cancelled'}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-8">
+                    No booking history yet.
+                  </p>
+                )}
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
 
@@ -466,6 +641,28 @@ const UserDashboard = () => {
         isOpen={isConfirmationModalOpen}
         onClose={() => setIsConfirmationModalOpen(false)}
         bookingDetails={bookingDetails}
+      />
+
+      {/* Booking Reschedule Modal */}
+      <BookingRescheduleModal
+        isOpen={isRescheduleModalOpen}
+        onClose={() => {
+          setIsRescheduleModalOpen(false);
+          setSelectedBooking(null);
+        }}
+        booking={selectedBooking}
+        onReschedule={handleBookingReschedule}
+      />
+
+      {/* Booking Cancel Modal */}
+      <BookingCancelModal
+        isOpen={isCancelModalOpen}
+        onClose={() => {
+          setIsCancelModalOpen(false);
+          setSelectedBooking(null);
+        }}
+        booking={selectedBooking}
+        onCancel={handleBookingCancel}
       />
     </div>
   );
