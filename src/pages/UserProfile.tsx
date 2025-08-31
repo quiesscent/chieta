@@ -144,7 +144,7 @@ const UserProfile = () => {
                 className="flex items-center text-muted-foreground hover:text-primary transition-colors"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
+                Dashboard
               </Link>
             </div>
 

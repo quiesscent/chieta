@@ -1,5 +1,4 @@
 import { useState } from "react";
-import floorPlanImage from "@/assets/office-floorplan.jpg";
 
 interface Desk {
   id: string;
@@ -122,7 +121,7 @@ export const FloorPlan = ({ onDeskClick, userBookings = [] }: FloorPlanProps) =>
       <div className="relative bg-secondary/10 rounded-lg overflow-hidden">
         <div className="relative w-full">
           <img
-            src="/lovable-uploads/252dba30-18a2-4579-82c1-e978088cdef6.png"
+            src="/lovable-uploads/c2b9e3e9-65a6-41d6-9229-e0226278954c.png"
             alt="Office floor plan with desks OP-1 to OP-52"
             className="w-full h-auto rounded-lg"
           />
@@ -153,29 +152,6 @@ export const FloorPlan = ({ onDeskClick, userBookings = [] }: FloorPlanProps) =>
         </div>
       </div>
 
-      {/* Legend - Mobile Optimized */}
-      <div className="mt-3 sm:mt-4 flex flex-wrap justify-center gap-2 sm:gap-3 text-xs">
-        <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 rounded-full bg-desk-available border-2 border-green-600"></div>
-          <span className="whitespace-nowrap">Available</span>
-        </div>
-        <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 rounded-full bg-desk-unavailable border-2 border-red-600"></div>
-          <span className="whitespace-nowrap">Unavailable</span>
-        </div>
-        <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 rounded-full bg-desk-booked border-2 border-orange-600"></div>
-          <span className="whitespace-nowrap">Your Booking</span>
-        </div>
-        <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 rounded-full bg-blue-500 border-2 border-blue-600"></div>
-          <span className="whitespace-nowrap">Checked In</span>
-        </div>
-        <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 rounded-full bg-desk-inactive border-2 border-gray-500"></div>
-          <span className="whitespace-nowrap">Inactive</span>
-        </div>
-      </div>
     </div>
   );
 };

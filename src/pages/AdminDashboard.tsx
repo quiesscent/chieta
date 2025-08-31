@@ -22,7 +22,8 @@ import {
   Trash2,
   Edit,
   Activity,
-  Eye
+  Eye,
+  Download
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -385,8 +386,7 @@ const AdminDashboard = () => {
                           }}
                           className="text-xs px-2 py-1 h-7"
                         >
-                          <span className="hidden sm:inline">CSV</span>
-                          <span className="sm:hidden">📊</span>
+                          <Download className="h-3 w-3" />
                         </Button>
                         <Button 
                           size="sm" 

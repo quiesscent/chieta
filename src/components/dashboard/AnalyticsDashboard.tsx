@@ -54,7 +54,7 @@ export const AnalyticsDashboard = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-64 sm:h-80">
+          <div className="h-48 sm:h-64 md:h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={weeklyBookingData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -85,7 +85,7 @@ export const AnalyticsDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64">
+            <div className="h-48 sm:h-56 md:h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -136,7 +136,7 @@ export const AnalyticsDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64">
+            <div className="h-48 sm:h-56 md:h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={monthlyTrendsData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
