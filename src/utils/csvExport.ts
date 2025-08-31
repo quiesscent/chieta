@@ -40,22 +40,16 @@ export const prepareBookingHistoryData = (bookings: any[]) => {
   }));
 };
 
-export const prepareEmployeeHistoryData = (employee: any) => {
-  const mockHistory = [
-    { date: '2024-01-15', action: 'Checked in', desk: 'OP-15', time: '09:30', duration: '8 hours' },
-    { date: '2024-01-14', action: 'Booked desk', desk: 'OP-22', time: '14:20', duration: '4 hours' },
-    { date: '2024-01-13', action: 'Checked out', desk: 'OP-08', time: '18:00', duration: '7 hours' },
-    { date: '2024-01-12', action: 'Checked in', desk: 'E-01', time: '08:45', duration: '8.5 hours' },
-    { date: '2024-01-11', action: 'Checked in', desk: 'OP-15', time: '09:15', duration: '7.5 hours' },
-  ];
-
-  return mockHistory.map(item => ({
-    'Employee Name': employee.name,
-    'Employee Email': employee.email,
-    'Date': item.date,
-    'Action': item.action,
-    'Desk/Office': item.desk,
-    'Time': item.time,
-    'Duration': item.duration,
+export const prepareEmployeeHistoryData = (employees: any[]) => {
+  return employees.map(employee => ({
+    'Employee ID': employee.id,
+    'Name': employee.name,
+    'Email': employee.email,
+    'Login Frequency': employee.loginFrequency,
+    'Status': employee.status,
+    'Last Login': '2024-01-15 09:30:00', // Mock data
+    'Total Bookings': Math.floor(Math.random() * 50) + 10, // Mock data
+    'Desk Preferences': 'OP-15, OP-22, OP-30', // Mock data
+    'Exported On': new Date().toISOString().split('T')[0]
   }));
 };

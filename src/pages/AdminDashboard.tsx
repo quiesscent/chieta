@@ -179,7 +179,7 @@ const AdminDashboard = () => {
                 <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg sm:text-xl font-bold text-primary truncate">DeskFlow Admin</h1>
+                <h1 className="text-lg sm:text-xl font-bold text-primary truncate">Chieta Desk System</h1>
                 <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Administration Dashboard</p>
               </div>
             </div>
@@ -346,27 +346,57 @@ const AdminDashboard = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant={employee.status === 'active' ? 'default' : 'secondary'}>
+                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+                      <Badge variant={employee.status === 'active' ? 'default' : 'secondary'} className="whitespace-nowrap">
                         {employee.status}
                       </Badge>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => handleViewEmployee(employee)}
-                        className="text-xs"
-                      >
-                        <Eye className="h-3 w-3 mr-1" />
-                        View
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => handleRemoveEmployee(employee.id)}
-                        className="text-xs"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
+                      <div className="flex space-x-1">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleViewEmployee(employee)}
+                          className="text-xs px-2 py-1 h-7"
+                        >
+                          <Eye className="h-3 w-3 sm:mr-1" />
+                          <span className="hidden sm:inline">View</span>
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedEmployee(employee);
+                            setIsEmployeeUpdateModalOpen(true);
+                          }}
+                          className="text-xs px-2 py-1 h-7"
+                        >
+                          <Edit className="h-3 w-3 sm:mr-1" />
+                          <span className="hidden sm:inline">Edit</span>
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            const csvData = prepareEmployeeHistoryData([employee]);
+                            downloadCSV(csvData, `${employee.name.replace(/\s+/g, '-').toLowerCase()}-history-${new Date().toISOString().split('T')[0]}`);
+                            toast({
+                              title: "Download Complete",
+                              description: `${employee.name}'s history has been downloaded.`,
+                            });
+                          }}
+                          className="text-xs px-2 py-1 h-7"
+                        >
+                          <span className="hidden sm:inline">CSV</span>
+                          <span className="sm:hidden">📊</span>
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleRemoveEmployee(employee.id)}
+                          className="text-xs px-2 py-1 h-7"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -476,16 +506,20 @@ const AdminDashboard = () => {
         onStatusUpdate={handleEmployeeStatusUpdate}
       />
 
-      <EmployeeUpdateModal
-        isOpen={isEmployeeUpdateModalOpen}
-        onClose={() => setIsEmployeeUpdateModalOpen(false)}
-        employee={selectedEmployee}
-        onUpdate={(employeeId, updatedData) => {
-          setEmployees(prev => prev.map(emp => 
-            emp.id === employeeId ? { ...emp, ...updatedData } : emp
-          ));
-        }}
-      />
+       <EmployeeUpdateModal
+         isOpen={isEmployeeUpdateModalOpen}
+         onClose={() => setIsEmployeeUpdateModalOpen(false)}
+         employee={selectedEmployee}
+         onUpdate={(employeeId, updatedData) => {
+           setEmployees(prev => prev.map(emp => 
+             emp.id === employeeId ? { ...emp, ...updatedData } : emp
+           ));
+           toast({
+             title: "Employee Updated",
+             description: "Employee information has been updated successfully.",
+           });
+         }}
+       />
 
       <Footer />
     </div>

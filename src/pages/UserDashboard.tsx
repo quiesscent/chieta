@@ -460,10 +460,15 @@ const UserDashboard = () => {
                 {userBookings.filter(b => b.status === 'reserved').length > 0 ? (
                   <div className="space-y-3">
                     {userBookings.filter(b => b.status === 'reserved').map((booking) => (
-                      <div 
-                        key={booking.id}
-                        className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-4 bg-orange-50 border border-orange-200 rounded-lg space-y-3 lg:space-y-0"
-                      >
+                       <div 
+                         key={booking.id}
+                         className={`flex flex-col lg:flex-row lg:items-center lg:justify-between p-4 bg-orange-50 border border-orange-200 rounded-lg space-y-3 lg:space-y-0 transition-colors ${
+                           booking.status === 'reserved' 
+                             ? 'cursor-pointer hover:bg-orange-100 hover:shadow-md' 
+                             : 'cursor-default'
+                         }`}
+                         onClick={() => booking.status === 'reserved' ? handleReservedBookingClick(booking) : undefined}
+                       >
                         <div className="flex items-center space-x-4">
                           <div className="bg-orange-500 p-2 rounded-lg">
                             <MapPin className="h-4 w-4 text-white" />
