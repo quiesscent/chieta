@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import chietaLogo from "@/assets/chieta-logo.jpeg";
 import { Link, useNavigate } from "react-router-dom";
-import { getProfile } from "@/services/apiClient";
+// import { getProfile } from "@/services/apiClient";
 
 const AdminDashboard = () => {
   const [employees, setEmployees] = useState([
@@ -102,17 +102,17 @@ const AdminDashboard = () => {
     useState(false);
 
   const [profile, setProfile] = useState();
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const data = await getProfile();
-        setProfile(data);
-      } catch (err) {
-        console.error("Failed to fetch profile", err);
-      }
-    };
-    fetchProfile();
-  }, []);
+  // useEffect(() => {
+  //   const fetchProfile = async () => {
+  //     try {
+  //       const data = await getProfile();
+  //       setProfile(data);
+  //     } catch (err) {
+  //       console.error("Failed to fetch profile", err);
+  //     }
+  //   };
+  //   fetchProfile();
+  // }, []);
   // Sample desk data for management
   const [desks, setDesks] = useState(
     Array.from({ length: 32 }, (_, index) => {
