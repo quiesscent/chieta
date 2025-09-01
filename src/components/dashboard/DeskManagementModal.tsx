@@ -96,7 +96,7 @@ export const DeskManagementModal = ({
 
         <div className="space-y-6 py-4">
           {/* Current Status */}
-          <div className="space-y-3">
+          {/* <div className="space-y-3">
             <Label className="text-base font-medium">Current Status</Label>
             <div className="flex items-center justify-between p-3 bg-secondary/20 rounded-lg">
               <div className="flex items-center space-x-3">
@@ -122,7 +122,7 @@ export const DeskManagementModal = ({
                 {desk.status}
               </Badge>
             </div>
-          </div>
+          </div> */}
 
           {/* Status Selection */}
           <div className="space-y-3">
@@ -155,6 +155,8 @@ export const DeskManagementModal = ({
             )}
           </div>
 
+
+
           {/* Status Descriptions */}
           <div className="bg-muted/20 rounded-lg p-3 text-xs text-muted-foreground">
             <p className="font-medium mb-2">Status Definitions:</p>
@@ -166,6 +168,35 @@ export const DeskManagementModal = ({
               <li><strong>Checked In:</strong> Currently occupied</li>
             </ul>
           </div>
+
+           <div className="space-y-3">
+            <Label className="text-base font-medium">Current Status</Label>
+            <div className="flex items-center justify-between p-3 bg-secondary/20 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div className="bg-gradient-primary p-2 rounded-lg">
+                  {desk.type === 'office' ? (
+                    <Users className="h-4 w-4 text-primary-foreground" />
+                  ) : (
+                    <MapPin className="h-4 w-4 text-primary-foreground" />
+                  )}
+                </div>
+                <div>
+                  <p className="font-medium">
+                    {desk.type === 'office' ? 'Office' : 'Desk'} {desk.id}
+                  </p>
+                  {desk.currentUser && (
+                    <p className="text-sm text-muted-foreground">
+                      Occupied by: {desk.currentUser}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <Badge className={getStatusColor(desk.status)}>
+                {desk.status}
+              </Badge>
+            </div>
+          </div>
+
 
           {/* Action Buttons */}
           <div className="flex space-x-3 pt-2">

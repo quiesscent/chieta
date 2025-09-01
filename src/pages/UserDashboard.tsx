@@ -491,7 +491,7 @@ const UserDashboard = () => {
                             Reserved {isConnectedToWifi ? '• Can Check In' : '• Need WiFi'}
                           </Badge>
                            <div className="flex space-x-2">
-                             {booking.status === 'reserved' && (
+                             {/* {booking.status === 'reserved' && (
                                <Button 
                                  size="sm" 
                                  variant="default"
@@ -500,7 +500,7 @@ const UserDashboard = () => {
                                >
                                  Check In
                                </Button>
-                             )}
+                             )} */}
                              <Button 
                                size="sm" 
                                variant="outline"
