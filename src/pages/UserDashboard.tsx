@@ -122,6 +122,12 @@ const UserDashboard = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Add user context for bookings
+  const [allDesks, setAllDesks] = useState(openFloorDesks);
+  const [deskBookings, setDeskBookings] = useState<{[deskId: string]: { user: string, status: string } | null}>({});
+  const userName = localStorage.getItem('userName') || 'You';
+  const userType = localStorage.getItem('userType') || 'user';
+
   // Simulate WiFi connection check
   useEffect(() => {
     // Random simulation of office WiFi connection
@@ -136,6 +142,9 @@ const UserDashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const [reservedDeskDetails, setReservedDeskDetails] = useState<any>(null);
+  const [isReservedDeskModalOpen, setIsReservedDeskModalOpen] = useState(false);
+
   const handleDeskCardClick = (deskId: string, status: string) => {
     if (status === 'available') {
       const desk = [...openFloorDesks, ...executiveOffices].find(d => d.id === deskId);
@@ -143,31 +152,19 @@ const UserDashboard = () => {
       setSelectedDeskType(desk?.type || 'desk');
       setIsBookingModalOpen(true);
     } else if (status === 'reserved' || status === 'booked') {
-      // Check if this is user's booking and they're on WiFi
-      const userBooking = userBookings.find(b => b.deskId === deskId && (b.status === 'reserved' || b.status === 'booked'));
-      if (userBooking && isConnectedToWifi) {
-        // Auto check-in
-        setUserBookings(prev => 
-          prev.map(b => 
-            b.id === userBooking.id 
-              ? { ...b, status: 'checked-in' }
-              : b
-          )
-        );
-        toast({
-          title: "Checked In Successfully!",
-          description: `You're now checked in at ${deskId}`,
-        });
-      } else if (userBooking && !isConnectedToWifi) {
-        toast({
-          title: "Not Connected to Office WiFi",
-          description: "Please connect to office WiFi to check in",
-          variant: "destructive"
-        });
-      }
+      // Show reserved desk details modal
+      setReservedDeskDetails({
+        deskId,
+        user: deskBookings[deskId]?.user || 'Unknown',
+        status: deskBookings[deskId]?.status || status,
+        // Add more info as needed (e.g., department, reservation date)
+        reservationDate: userBookings.find(b => b.deskId === deskId)?.date || 'N/A',
+      });
+      setIsReservedDeskModalOpen(true);
     }
   };
 
+  // Update booking logic to set desk as reserved/booked and store user
   const handleBookingConfirm = (deskId: string, date: string, time: string, type: 'desk' | 'office') => {
     const newBooking = {
       id: Date.now().toString(),
@@ -177,17 +174,10 @@ const UserDashboard = () => {
       status: 'reserved' as const,
       type
     };
-    
     setUserBookings(prev => [...prev, newBooking]);
-    
-    // Set booking details for confirmation modal
-    setBookingDetails({
-      deskId,
-      date,
-      time,
-      type
-    });
-    
+    setDeskBookings(prev => ({ ...prev, [deskId]: { user: userName, status: 'reserved' } }));
+    setAllDesks(prev => prev.map(d => d.id === deskId ? { ...d, status: 'reserved' } : d));
+    setBookingDetails({ deskId, date, time, type });
     setIsBookingModalOpen(false);
     setSelectedDesk(null);
     setIsConfirmationModalOpen(true);
@@ -211,6 +201,8 @@ const UserDashboard = () => {
   const handleBookingCancel = (bookingId: string) => {
     const booking = userBookings.find(b => b.id === bookingId);
     setUserBookings(prev => prev.filter(b => b.id !== bookingId));
+    setDeskBookings(prev => ({ ...prev, [booking?.deskId!]: null }));
+    setAllDesks(prev => prev.map(d => d.id === booking?.deskId ? { ...d, status: 'available' } : d));
     
     toast({
       title: "Booking Cancelled",
@@ -241,6 +233,18 @@ const UserDashboard = () => {
       title: "Download Complete",
       description: "Your booking history has been downloaded as CSV.",
     });
+  };
+
+  // Handler for meeting room booking modal
+  const [isMeetingRoomModalOpen, setIsMeetingRoomModalOpen] = useState(false);
+  const [selectedMeetingRoom, setSelectedMeetingRoom] = useState<string | null>(null);
+  const handleMeetingRoomClick = (roomId: string) => {
+    setSelectedMeetingRoom(roomId);
+    setIsMeetingRoomModalOpen(true);
+  };
+  const handleBoardRoomClick = () => {
+    setSelectedMeetingRoom('Board Room');
+    setIsMeetingRoomModalOpen(true);
   };
 
   // Filter functions
@@ -596,9 +600,10 @@ const UserDashboard = () => {
 
         {/* Floor Plan and Desk Management */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="open-floor">Open Floor Plan</TabsTrigger>
             <TabsTrigger value="executive-suite">Executive Suite</TabsTrigger>
+            <TabsTrigger value="meeting-rooms">Meeting Rooms</TabsTrigger>
           </TabsList>
           
           <TabsContent value="open-floor" className="space-y-6">
@@ -635,6 +640,7 @@ const UserDashboard = () => {
                       key={desk.id}
                       desk={desk}
                       onClick={handleDeskCardClick}
+                      bookedBy={deskBookings[desk.id]?.user}
                     />
                   ))}
                 </div>
@@ -677,6 +683,35 @@ const UserDashboard = () => {
                     No offices match the selected filter.
                   </p>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="meeting-rooms" className="space-y-6">
+            <Card className="shadow-custom-md">
+              <CardHeader>
+                <CardTitle className="text-xl font-bold text-primary">
+                  Meeting Rooms
+                </CardTitle>
+                <p className="text-muted-foreground">
+                  Book a meeting room or the board room
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                  {[...Array(7)].map((_, i) => (
+                    <DeskCard
+                      key={`MR-0${i+1}`}
+                      desk={{ id: `MR-0${i+1}`, type: 'office', status: 'available' }}
+                      onClick={() => handleMeetingRoomClick(`MR-0${i+1}`)}
+                    />
+                  ))}
+                  <DeskCard
+                    key="BoardRoom"
+                    desk={{ id: 'Board Room', type: 'office', status: 'available' }}
+                    onClick={() => handleBoardRoomClick()}
+                  />
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -730,6 +765,34 @@ const UserDashboard = () => {
         booking={selectedBooking}
         onCheckIn={handleCheckIn}
       />
+
+      {/* Booking Modal for Meeting Rooms */}
+      <BookingModal
+        isOpen={isMeetingRoomModalOpen}
+        onClose={() => {
+          setIsMeetingRoomModalOpen(false);
+          setSelectedMeetingRoom(null);
+        }}
+        deskId={selectedMeetingRoom}
+        deskType="office"
+        onConfirm={handleBookingConfirm}
+        isBoardRoom={selectedMeetingRoom === 'Board Room'}
+      />
+
+      {/* Reserved Desk Details Modal */}
+      {isReservedDeskModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm animate-fade-in">
+            <h3 className="text-lg font-bold mb-2 text-primary">Reserved Desk Details</h3>
+            <p><strong>Desk:</strong> {reservedDeskDetails.deskId}</p>
+            <p><strong>Reserved By:</strong> {reservedDeskDetails.user}</p>
+            <p><strong>Reservation Date:</strong> {reservedDeskDetails.reservationDate}</p>
+            <div className="mt-4 flex justify-end">
+              <Button onClick={() => setIsReservedDeskModalOpen(false)} variant="outline">Close</Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
