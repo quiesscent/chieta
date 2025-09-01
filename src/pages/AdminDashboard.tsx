@@ -182,11 +182,11 @@ const AdminDashboard = () => {
 {/*                 <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" /> */}
               </div>
               <div className="min-w-0">
-{/*                 <h1 className="text-lg sm:text-xl font-bold text-primary truncate flex items-center">
+{/*            <h1 className="text-lg sm:text-xl font-bold text-primary truncate flex items-center">
                   Chieta Desk System
                 </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Administration Dashboard</p>
-              </div> */}
+                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Administration Dashboard</p> */}
+              </div> 
             </div>
 
             <div className="flex items-center space-x-2 sm:space-x-4">
