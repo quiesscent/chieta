@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,24 +23,73 @@ import {
   Edit,
   Activity,
   Eye,
-  Download
+  Download,
 } from "lucide-react";
 import chietaLogo from "@/assets/chieta-logo.jpeg";
 import { Link, useNavigate } from "react-router-dom";
+import { getProfile } from "@/services/apiClient";
 
 const AdminDashboard = () => {
   const [employees, setEmployees] = useState([
-    { id: "1", name: "John Doe", email: "john@demo.com", loginFrequency: 25, status: "active" },
-    { id: "2", name: "Jane Smith", email: "jane@demo.com", loginFrequency: 18, status: "active" },
-    { id: "3", name: "Mike Johnson", email: "mike@demo.com", loginFrequency: 12, status: "inactive" },
-    { id: "4", name: "Sarah Wilson", email: "sarah@demo.com", loginFrequency: 31, status: "active" },
+    {
+      id: "1",
+      name: "John Doe",
+      email: "john@demo.com",
+      loginFrequency: 25,
+      status: "active",
+    },
+    {
+      id: "2",
+      name: "Jane Smith",
+      email: "jane@demo.com",
+      loginFrequency: 18,
+      status: "active",
+    },
+    {
+      id: "3",
+      name: "Mike Johnson",
+      email: "mike@demo.com",
+      loginFrequency: 12,
+      status: "inactive",
+    },
+    {
+      id: "4",
+      name: "Sarah Wilson",
+      email: "sarah@demo.com",
+      loginFrequency: 31,
+      status: "active",
+    },
   ]);
 
   const [userLogs, setUserLogs] = useState([
-    { id: "1", user: "John Doe", action: "Checked in", desk: "D-15", timestamp: "2024-01-15 09:30:00" },
-    { id: "2", user: "Jane Smith", action: "Booked desk", desk: "D-22", timestamp: "2024-01-15 09:15:00" },
-    { id: "3", user: "Mike Johnson", action: "Logged in", desk: "-", timestamp: "2024-01-15 08:45:00" },
-    { id: "4", user: "Sarah Wilson", action: "Checked out", desk: "D-08", timestamp: "2024-01-15 17:30:00" },
+    {
+      id: "1",
+      user: "John Doe",
+      action: "Checked in",
+      desk: "D-15",
+      timestamp: "2024-01-15 09:30:00",
+    },
+    {
+      id: "2",
+      user: "Jane Smith",
+      action: "Booked desk",
+      desk: "D-22",
+      timestamp: "2024-01-15 09:15:00",
+    },
+    {
+      id: "3",
+      user: "Mike Johnson",
+      action: "Logged in",
+      desk: "-",
+      timestamp: "2024-01-15 08:45:00",
+    },
+    {
+      id: "4",
+      user: "Sarah Wilson",
+      action: "Checked out",
+      desk: "D-08",
+      timestamp: "2024-01-15 17:30:00",
+    },
   ]);
 
   const [newEmployee, setNewEmployee] = useState({ name: "", email: "" });
@@ -49,24 +98,39 @@ const AdminDashboard = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [isDeskModalOpen, setIsDeskModalOpen] = useState(false);
   const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
-  const [isEmployeeUpdateModalOpen, setIsEmployeeUpdateModalOpen] = useState(false);
+  const [isEmployeeUpdateModalOpen, setIsEmployeeUpdateModalOpen] =
+    useState(false);
 
+  const [profile, setProfile] = useState();
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await getProfile();
+        setProfile(data);
+      } catch (err) {
+        console.error("Failed to fetch profile", err);
+      }
+    };
+    fetchProfile();
+  }, []);
   // Sample desk data for management
   const [desks, setDesks] = useState(
     Array.from({ length: 32 }, (_, index) => {
-      const deskNumber = (index + 1).toString().padStart(2, '0');
-      const statuses = ['available', 'unavailable', 'booked', 'inactive'];
-      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-      
+      const deskNumber = (index + 1).toString().padStart(2, "0");
+      const statuses = ["available", "unavailable", "booked", "inactive"];
+      const randomStatus =
+        statuses[Math.floor(Math.random() * statuses.length)];
+
       return {
         id: `D-${deskNumber}`,
-        type: 'desk' as const,
+        type: "desk" as const,
         status: randomStatus,
-        currentUser: randomStatus === 'booked' || randomStatus === 'checked-in' 
-          ? employees[Math.floor(Math.random() * employees.length)]?.name 
-          : undefined
+        currentUser:
+          randomStatus === "booked" || randomStatus === "checked-in"
+            ? employees[Math.floor(Math.random() * employees.length)]?.name
+            : undefined,
       };
-    })
+    }),
   );
 
   const { toast } = useToast();
@@ -79,13 +143,13 @@ const AdminDashboard = () => {
         name: newEmployee.name,
         email: newEmployee.email,
         loginFrequency: 0,
-        status: "active"
+        status: "active",
       };
-      
-      setEmployees(prev => [...prev, employee]);
+
+      setEmployees((prev) => [...prev, employee]);
       setNewEmployee({ name: "", email: "" });
       setIsAddingEmployee(false);
-      
+
       toast({
         title: "Employee Added Successfully",
         description: `${employee.name} has been added to the system.`,
@@ -94,22 +158,23 @@ const AdminDashboard = () => {
   };
 
   const handleRemoveEmployee = (id: string) => {
-    const employee = employees.find(emp => emp.id === id);
-    setEmployees(prev => prev.filter(emp => emp.id !== id));
-    
+    const employee = employees.find((emp) => emp.id === id);
+    setEmployees((prev) => prev.filter((emp) => emp.id !== id));
+
     toast({
       title: "Employee Removed",
       description: `${employee?.name} has been removed from the system.`,
     });
   };
 
-  const handleEmployeeStatusUpdate = (employeeId: string, newStatus: string) => {
-    setEmployees(prev => 
-      prev.map(emp => 
-        emp.id === employeeId 
-          ? { ...emp, status: newStatus }
-          : emp
-      )
+  const handleEmployeeStatusUpdate = (
+    employeeId: string,
+    newStatus: string,
+  ) => {
+    setEmployees((prev) =>
+      prev.map((emp) =>
+        emp.id === employeeId ? { ...emp, status: newStatus } : emp,
+      ),
     );
   };
 
@@ -124,23 +189,28 @@ const AdminDashboard = () => {
   };
 
   const handleDeskStatusUpdate = (deskId: string, newStatus: string) => {
-    setDesks(prev => 
-      prev.map(desk => 
-        desk.id === deskId 
-          ? { ...desk, status: newStatus, currentUser: newStatus === 'available' ? undefined : desk.currentUser }
-          : desk
-      )
+    setDesks((prev) =>
+      prev.map((desk) =>
+        desk.id === deskId
+          ? {
+              ...desk,
+              status: newStatus,
+              currentUser:
+                newStatus === "available" ? undefined : desk.currentUser,
+            }
+          : desk,
+      ),
     );
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('userType');
-    localStorage.removeItem('userEmail');
+    localStorage.removeItem("userType");
+    localStorage.removeItem("userEmail");
     toast({
       title: "Successfully Logged Out",
       description: "See you next time!",
     });
-    navigate('/');
+    navigate("/");
   };
 
   const stats = [
@@ -148,26 +218,26 @@ const AdminDashboard = () => {
       title: "Total Employees",
       value: employees.length.toString(),
       icon: Users,
-      description: "Active users"
+      description: "Active users",
     },
     {
       title: "Active Bookings",
       value: "15",
       icon: MapPin,
-      description: "Currently reserved"
+      description: "Currently reserved",
     },
     {
       title: "Daily Logins",
       value: "42",
       icon: TrendingUp,
-      description: "Today"
+      description: "Today",
     },
     {
       title: "Desk Utilization",
       value: "78%",
       icon: Activity,
-      description: "This week"
-    }
+      description: "This week",
+    },
   ];
 
   return (
@@ -177,8 +247,18 @@ const AdminDashboard = () => {
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16 gap-2">
             <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
-              <div className="p-1.5 sm:p-2 rounded-lg flex items-center">
-                <img src={chietaLogo} alt="Chieta Logo" className="h-10 w-20 mr-2" />
+              <div className="bg-gradient-primary p-1.5 sm:p-2 rounded-lg flex items-center">
+                <img
+                  src={chietaLogo}
+                  alt="Chieta Logo"
+                  className="h-10 w-20 mr-2"
+                />
+                {/*<Settings className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />*/}
+              </div>
+              <div className="min-w-0">
+                {/*<p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
+                  Administration Dashboard
+                </p>*/}
               </div>
             </div>
 
@@ -193,11 +273,21 @@ const AdminDashboard = () => {
                 </Button>
               </Link>
 
-              <Button variant="outline" size="sm" onClick={handleLogout} className="hidden sm:flex">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                className="hidden sm:flex"
+              >
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
-              <Button variant="outline" size="sm" onClick={handleLogout} className="sm:hidden p-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                className="sm:hidden p-2"
+              >
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
@@ -219,7 +309,7 @@ const AdminDashboard = () => {
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
           {stats.map((stat, index) => (
-            <Card 
+            <Card
               key={stat.title}
               className="animate-fade-in hover:shadow-custom-md transition-all duration-300"
               style={{ animationDelay: `${index * 0.1}s` }}
@@ -270,8 +360,8 @@ const AdminDashboard = () => {
                 <CardTitle className="text-xl font-bold text-primary">
                   Employee Management
                 </CardTitle>
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   onClick={() => setIsAddingEmployee(true)}
                   className="bg-gradient-primary"
                 >
@@ -290,7 +380,12 @@ const AdminDashboard = () => {
                       <Input
                         id="name"
                         value={newEmployee.name}
-                        onChange={(e) => setNewEmployee(prev => ({ ...prev, name: e.target.value }))}
+                        onChange={(e) =>
+                          setNewEmployee((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }))
+                        }
                         placeholder="John Doe"
                         className="border-primary/20 focus:border-primary"
                       />
@@ -301,7 +396,12 @@ const AdminDashboard = () => {
                         id="email"
                         type="email"
                         value={newEmployee.email}
-                        onChange={(e) => setNewEmployee(prev => ({ ...prev, email: e.target.value }))}
+                        onChange={(e) =>
+                          setNewEmployee((prev) => ({
+                            ...prev,
+                            email: e.target.value,
+                          }))
+                        }
                         placeholder="john@company.com"
                         className="border-primary/20 focus:border-primary"
                       />
@@ -310,9 +410,9 @@ const AdminDashboard = () => {
                       <Button size="sm" onClick={handleAddEmployee}>
                         Add Employee
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
+                      <Button
+                        size="sm"
+                        variant="outline"
                         onClick={() => {
                           setIsAddingEmployee(false);
                           setNewEmployee({ name: "", email: "" });
@@ -329,7 +429,7 @@ const AdminDashboard = () => {
               <div className="overflow-x-auto">
                 <div className="space-y-3 min-w-full">
                   {employees.map((employee) => (
-                    <div 
+                    <div
                       key={employee.id}
                       className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 bg-secondary/10 rounded-lg gap-3 sm:gap-4 min-w-0"
                     >
@@ -338,20 +438,31 @@ const AdminDashboard = () => {
                           <User className="h-4 w-4 text-primary-foreground" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-primary truncate">{employee.name}</p>
-                          <p className="text-sm text-muted-foreground truncate">{employee.email}</p>
+                          <p className="font-semibold text-primary truncate">
+                            {employee.name}
+                          </p>
+                          <p className="text-sm text-muted-foreground truncate">
+                            {employee.email}
+                          </p>
                           <p className="text-xs text-muted-foreground whitespace-nowrap">
                             {employee.loginFrequency} logins this month
                           </p>
                         </div>
                       </div>
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto shrink-0">
-                        <Badge variant={employee.status === 'active' ? 'default' : 'secondary'} className="whitespace-nowrap">
+                        <Badge
+                          variant={
+                            employee.status === "active"
+                              ? "default"
+                              : "secondary"
+                          }
+                          className="whitespace-nowrap"
+                        >
                           {employee.status}
                         </Badge>
                         <div className="flex gap-1 w-full sm:w-auto shrink-0">
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             variant="outline"
                             onClick={() => handleViewEmployee(employee)}
                             className="text-xs px-2 py-1 h-7 whitespace-nowrap"
@@ -359,8 +470,8 @@ const AdminDashboard = () => {
                             <Eye className="h-3 w-3 sm:mr-1" />
                             <span className="hidden sm:inline">View</span>
                           </Button>
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             variant="outline"
                             onClick={() => {
                               setSelectedEmployee(employee);
@@ -371,12 +482,17 @@ const AdminDashboard = () => {
                             <Edit className="h-3 w-3 sm:mr-1" />
                             <span className="hidden sm:inline">Edit</span>
                           </Button>
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             variant="outline"
                             onClick={() => {
-                              const csvData = prepareEmployeeHistoryData([employee]);
-                              downloadCSV(csvData, `${employee.name.replace(/\s+/g, '-').toLowerCase()}-history-${new Date().toISOString().split('T')[0]}`);
+                              const csvData = prepareEmployeeHistoryData([
+                                employee,
+                              ]);
+                              downloadCSV(
+                                csvData,
+                                `${employee.name.replace(/\s+/g, "-").toLowerCase()}-history-${new Date().toISOString().split("T")[0]}`,
+                              );
                               toast({
                                 title: "Download Complete",
                                 description: `${employee.name}'s history has been downloaded.`,
@@ -386,8 +502,8 @@ const AdminDashboard = () => {
                           >
                             <Download className="h-3 w-3" />
                           </Button>
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             variant="outline"
                             onClick={() => handleRemoveEmployee(employee.id)}
                             className="text-xs px-2 py-1 h-7 whitespace-nowrap"
@@ -413,7 +529,7 @@ const AdminDashboard = () => {
             <CardContent>
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {userLogs.map((log) => (
-                  <div 
+                  <div
                     key={log.id}
                     className="flex items-center justify-between p-3 bg-secondary/10 rounded-lg"
                   >
@@ -424,7 +540,7 @@ const AdminDashboard = () => {
                       <div>
                         <p className="font-medium text-primary">{log.user}</p>
                         <p className="text-sm text-muted-foreground">
-                          {log.action} {log.desk !== '-' && `at ${log.desk}`}
+                          {log.action} {log.desk !== "-" && `at ${log.desk}`}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {new Date(log.timestamp).toLocaleString()}
@@ -449,17 +565,20 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2 sm:gap-3 lg:gap-4">
               {desks.map((desk) => (
                 <div key={desk.id} className="text-center">
-                  <div 
+                  <div
                     className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full mx-auto mb-1 sm:mb-2 flex items-center justify-center text-xs font-bold text-white cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-lg ${
-                      desk.status === 'available' ? 'bg-desk-available hover:bg-green-600' :
-                      desk.status === 'unavailable' ? 'bg-desk-unavailable hover:bg-red-600' :
-                      desk.status === 'booked' ? 'bg-desk-booked hover:bg-orange-600' :
-                      'bg-desk-inactive hover:bg-gray-600'
+                      desk.status === "available"
+                        ? "bg-desk-available hover:bg-green-600"
+                        : desk.status === "unavailable"
+                          ? "bg-desk-unavailable hover:bg-red-600"
+                          : desk.status === "booked"
+                            ? "bg-desk-booked hover:bg-orange-600"
+                            : "bg-desk-inactive hover:bg-gray-600"
                     }`}
                     onClick={() => handleDeskClick(desk)}
                   >
                     <span className="text-xs sm:text-xs">
-                      {desk.id.split('-')[1]}
+                      {desk.id.split("-")[1]}
                     </span>
                   </div>
                   <Button
@@ -473,7 +592,7 @@ const AdminDashboard = () => {
                   </Button>
                   {desk.currentUser && (
                     <p className="text-xs text-muted-foreground mt-1 truncate max-w-full">
-                      {desk.currentUser.split(' ')[0]}
+                      {desk.currentUser.split(" ")[0]}
                     </p>
                   )}
                 </div>
@@ -505,20 +624,22 @@ const AdminDashboard = () => {
         onStatusUpdate={handleEmployeeStatusUpdate}
       />
 
-       <EmployeeUpdateModal
-         isOpen={isEmployeeUpdateModalOpen}
-         onClose={() => setIsEmployeeUpdateModalOpen(false)}
-         employee={selectedEmployee}
-         onUpdate={(employeeId, updatedData) => {
-           setEmployees(prev => prev.map(emp => 
-             emp.id === employeeId ? { ...emp, ...updatedData } : emp
-           ));
-           toast({
-             title: "Employee Updated",
-             description: "Employee information has been updated successfully.",
-           });
-         }}
-       />
+      <EmployeeUpdateModal
+        isOpen={isEmployeeUpdateModalOpen}
+        onClose={() => setIsEmployeeUpdateModalOpen(false)}
+        employee={selectedEmployee}
+        onUpdate={(employeeId, updatedData) => {
+          setEmployees((prev) =>
+            prev.map((emp) =>
+              emp.id === employeeId ? { ...emp, ...updatedData } : emp,
+            ),
+          );
+          toast({
+            title: "Employee Updated",
+            description: "Employee information has been updated successfully.",
+          });
+        }}
+      />
 
       <Footer />
     </div>
