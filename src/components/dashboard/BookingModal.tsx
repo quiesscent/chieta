@@ -16,30 +16,18 @@ interface BookingModalProps {
   deskId: string | null;
   deskType?: 'desk' | 'office';
   onConfirm: (deskId: string, date: string, time: string, type: 'desk' | 'office') => void;
+  isBoardRoom?: boolean; // Add prop for board room
 }
 
-export const BookingModal = ({ isOpen, onClose, deskId, deskType = 'desk', onConfirm }: BookingModalProps) => {
+export const BookingModal = ({ isOpen, onClose, deskId, deskType = 'desk', onConfirm, isBoardRoom = false }: BookingModalProps) => {
+  // For board room, allow any date from today onwards
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Get today and tomorrow dates
   const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  const formatDate = (date: Date) => {
-    return date.toISOString().split('T')[0];
-  };
-
-  const formatDisplayDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+  const formatDate = (date: Date) => date.toISOString().split('T')[0];
+  const formatDisplayDate = (date: Date) => date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   const timeSlots = [
     "08:00 AM",
@@ -98,7 +86,6 @@ export const BookingModal = ({ isOpen, onClose, deskId, deskType = 'desk', onCon
             <span>Book {deskType === 'office' ? 'Office' : 'Desk'} {deskId}</span>
           </DialogTitle>
         </DialogHeader>
-
         <div className="space-y-6 py-4">
           {/* Date Selection */}
           <div className="space-y-3 animate-slide-up" style={{ animationDelay: '0.1s' }}>
@@ -106,19 +93,30 @@ export const BookingModal = ({ isOpen, onClose, deskId, deskType = 'desk', onCon
               <Calendar className="h-4 w-4" />
               <span>Select Date</span>
             </Label>
-            <Select value={selectedDate} onValueChange={setSelectedDate} disabled={isLoading}>
-              <SelectTrigger className="border-primary/20 focus:border-primary transition-all duration-300 hover:border-primary/40">
-                <SelectValue placeholder="Choose a date" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={formatDate(today)}>
-                  Today - {formatDisplayDate(today)}
-                </SelectItem>
-                <SelectItem value={formatDate(tomorrow)}>
-                  Tomorrow - {formatDisplayDate(tomorrow)}
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            {isBoardRoom ? (
+              <input
+                type="date"
+                min={formatDate(today)}
+                value={selectedDate}
+                onChange={e => setSelectedDate(e.target.value)}
+                className="border rounded px-2 py-1 w-full border-primary/20 focus:border-primary"
+                disabled={isLoading}
+              />
+            ) : (
+              <Select value={selectedDate} onValueChange={setSelectedDate} disabled={isLoading}>
+                <SelectTrigger className="border-primary/20 focus:border-primary transition-all duration-300 hover:border-primary/40">
+                  <SelectValue placeholder="Choose a date" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={formatDate(today)}>
+                    Today - {formatDisplayDate(today)}
+                  </SelectItem>
+                  <SelectItem value={formatDate(new Date(today.getTime() + 86400000))}>
+                    Tomorrow - {formatDisplayDate(new Date(today.getTime() + 86400000))}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           {/* Time Selection */}
@@ -171,7 +169,6 @@ export const BookingModal = ({ isOpen, onClose, deskId, deskType = 'desk', onCon
             >
               {isLoading ? "Booking..." : "Confirm Booking"}
             </Button>
-            
           </div>
         </div>
 

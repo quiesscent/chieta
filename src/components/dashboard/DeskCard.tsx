@@ -8,11 +8,13 @@ interface DeskCardProps {
     type: 'desk' | 'office';
     status: 'available' | 'unavailable' | 'reserved' | 'booked' | 'checked-in' | 'inactive';
     capacity?: number;
+    bookedBy?: string; // Add bookedBy for display
   };
   onClick: (deskId: string, status: string) => void;
+  bookedBy?: string; // Pass bookedBy from parent
 }
 
-export const DeskCard = ({ desk, onClick }: DeskCardProps) => {
+export const DeskCard = ({ desk, onClick, bookedBy }: DeskCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'available':
@@ -75,6 +77,10 @@ export const DeskCard = ({ desk, onClick }: DeskCardProps) => {
                 <p className="text-xs text-muted-foreground">
                   Capacity: {desk.capacity} {desk.capacity === 1 ? 'person' : 'people'}
                 </p>
+              )}
+              {/* Show who booked if reserved/booked */}
+              {(desk.status === 'reserved' || desk.status === 'booked') && bookedBy && (
+                <p className="text-xs text-warning-foreground mt-1">Booked by: {bookedBy}</p>
               )}
             </div>
           </div>

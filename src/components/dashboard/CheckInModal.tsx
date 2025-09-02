@@ -154,7 +154,8 @@ export const CheckInModal = ({
             {isConnectedToWifi && !isCheckingWifi && (
               <Button 
                 onClick={handleCheckIn}
-                className="flex-1 bg-gradient-primary hover:shadow-custom-md"
+                variant="default"
+                className="flex-1 font-medium py-2 px-4 rounded-lg shadow-md"
                 loading={isCheckingIn}
                 disabled={isCheckingIn}
               >
