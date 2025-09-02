@@ -34,7 +34,7 @@ import { Link, useNavigate } from "react-router-dom";
 const UserDashboard = () => {
   const [selectedDesk, setSelectedDesk] = useState<string | null>(null);
   const [selectedDeskType, setSelectedDeskType] = useState<"desk" | "office">(
-    "desk",
+    "desk"
   );
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
@@ -220,17 +220,40 @@ const UserDashboard = () => {
 
   // Simulate WiFi connection check
   useEffect(() => {
-    // Random simulation of office WiFi connection
-    const checkWifi = () => {
-      const connected = Math.random() > 0.3; // 70% chance of being connected
-      setIsConnectedToWifi(connected);
+    const allowedIPs = ["105.163.156.44", "197.248.10.99"];
+
+    const checkwifi = async () => {
+      try {
+        // Fetch public IP
+        const res = await fetch("https://api.ipify.org?format=json");
+        const data = await res.json();
+
+        // Compare the api
+        const connected = allowedIPs.includes(data.ip);
+        setIsConnectedToWifi(connected);
+        
+      } catch (error) {
+        console.error("Failed to check Wifi/IP:", error);
+        setIsConnectedToWifi(false);
+      }
     };
 
-    checkWifi();
-    const interval = setInterval(checkWifi, 30000); // Check every 30 seconds
-
+    checkwifi();
+    const interval = setInterval(checkwifi, 30000);
     return () => clearInterval(interval);
   }, []);
+  
+  useEffect(() => {
+    if (isConnectedToWifi) {
+      setUserBookings((prev) =>
+        prev.map((booking) =>
+          booking.status === "reserved"
+            ? { ...booking, status: "checked-in" }
+            : booking
+        )
+      );
+    }
+  }, [isConnectedToWifi]);
 
   const [reservedDeskDetails, setReservedDeskDetails] = useState<any>(null);
   const [isReservedDeskModalOpen, setIsReservedDeskModalOpen] = useState(false);
@@ -277,13 +300,13 @@ const UserDashboard = () => {
 
   // --- Desk state management for available/booked lists ---
   const [availableDesks, setAvailableDesks] = useState<
-    Array<{ id: string; type: 'desk' | 'office'; status: string }>
+    Array<{ id: string; type: "desk" | "office"; status: string }>
   >(openFloorDesks.filter((d) => d.status === "available"));
   const [unavailableDesks, setUnavailableDesks] = useState<
-    Array<{ id: string; type: 'desk' | 'office'; status: string }>
+    Array<{ id: string; type: "desk" | "office"; status: string }>
   >(openFloorDesks.filter((d) => d.status === "unavailable"));
   const [bookedDesks, setBookedDesks] = useState<
-    Array<{ id: string; type: 'desk' | 'office'; status: string }>
+    Array<{ id: string; type: "desk" | "office"; status: string }>
   >(openFloorDesks.filter((d) => d.status === "booked"));
 
   // Update booking logic to move desk between lists
@@ -291,7 +314,7 @@ const UserDashboard = () => {
     deskId: string,
     date: string,
     time: string,
-    type: "desk" | "office",
+    type: "desk" | "office"
   ) => {
     const newBooking = {
       id: Date.now().toString(),
@@ -307,14 +330,14 @@ const UserDashboard = () => {
       [deskId]: { user: userName, status: "booked" },
     }));
     setAvailableDesks((prev) => prev.filter((d) => d.id !== deskId));
-      setBookedDesks((prev) => [
-        ...prev,
-        openFloorDesks.find((d) => d.id === deskId) || {
-          id: deskId,
-          type: type as 'desk' | 'office',
-          status: "booked",
-        },
-      ]);
+    setBookedDesks((prev) => [
+      ...prev,
+      openFloorDesks.find((d) => d.id === deskId) || {
+        id: deskId,
+        type: type as "desk" | "office",
+        status: "booked",
+      },
+    ]);
     setBookingDetails({ deskId, date, time, type });
     setIsBookingModalOpen(false);
     setSelectedDesk(null);
@@ -324,14 +347,14 @@ const UserDashboard = () => {
   const handleBookingReschedule = (
     bookingId: string,
     newDate: string,
-    newTime: string,
+    newTime: string
   ) => {
     setUserBookings((prev) =>
       prev.map((booking) =>
         booking.id === bookingId
           ? { ...booking, date: newDate, time: newTime }
-          : booking,
-      ),
+          : booking
+      )
     );
 
     toast({
@@ -347,19 +370,19 @@ const UserDashboard = () => {
     // Move desk back to available
     if (booking && bookedDesks.find((d) => d.id === booking.deskId)) {
       setBookedDesks((prev) => prev.filter((d) => d.id !== booking.deskId));
-        setAvailableDesks((prev) => [
-          ...prev,
-          openFloorDesks.find((d) => d.id === booking.deskId) || {
-            id: booking.deskId,
-            type: booking.type as 'desk' | 'office',
-            status: "available",
-          },
-        ]);
+      setAvailableDesks((prev) => [
+        ...prev,
+        openFloorDesks.find((d) => d.id === booking.deskId) || {
+          id: booking.deskId,
+          type: booking.type as "desk" | "office",
+          status: "available",
+        },
+      ]);
     }
     setAllDesks((prev) =>
       prev.map((d) =>
-        d.id === booking?.deskId ? { ...d, status: "available" } : d,
-      ),
+        d.id === booking?.deskId ? { ...d, status: "available" } : d
+      )
     );
     toast({
       title: "Booking Cancelled",
@@ -377,8 +400,8 @@ const UserDashboard = () => {
       prevBookings.map((booking) =>
         booking.id === bookingId
           ? { ...booking, status: "checked-in" }
-          : booking,
-      ),
+          : booking
+      )
     );
     setIsCheckInModalOpen(false);
   };
@@ -387,7 +410,7 @@ const UserDashboard = () => {
     const csvData = prepareBookingHistoryData(userBookings);
     downloadCSV(
       csvData,
-      `chieta-desk-bookings-${new Date().toISOString().split("T")[0]}`,
+      `chieta-desk-bookings-${new Date().toISOString().split("T")[0]}`
     );
     toast({
       title: "Download Complete",
@@ -398,7 +421,7 @@ const UserDashboard = () => {
   // Handler for meeting room booking modal
   const [isMeetingRoomModalOpen, setIsMeetingRoomModalOpen] = useState(false);
   const [selectedMeetingRoom, setSelectedMeetingRoom] = useState<string | null>(
-    null,
+    null
   );
   const handleMeetingRoomClick = (roomId: string) => {
     setSelectedMeetingRoom(roomId);
@@ -520,7 +543,11 @@ const UserDashboard = () => {
               </div>
 
               <Link to="/calendar">
-                <Button variant="outline" size="sm" className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center space-x-2"
+                >
                   <Calendar className="h-4 w-4" />
                   <span className="hidden sm:inline">Calendar</span>
                 </Button>
@@ -684,23 +711,31 @@ const UserDashboard = () => {
                           </div>
 
                           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 lg:items-center">
-                            <Badge variant="secondary" className="w-fit">
+                            {/* <Badge variant="secondary" className="w-fit">
                               Reserved{" "}
                               {isConnectedToWifi
                                 ? "• Can Check In"
                                 : "• Need WiFi"}
-                            </Badge>
+                            </Badge> */}
                             <div className="flex space-x-2">
-                              {/* {booking.status === 'reserved' && (
-                               <Button
-                                 size="sm"
-                                 variant="default"
-                                 onClick={() => handleReservedBookingClick(booking)}
-                                 className="text-xs bg-primary text-primary-foreground"
-                               >
-                                 Check In
-                               </Button>
-                             )} */}
+                              {booking.status === "reserved" && (
+                                <Button
+                                  size="sm"
+                                  onClick={() =>
+                                    handleReservedBookingClick(booking)
+                                  }
+                                  disabled={!isConnectedToWifi}
+                                  className={`text-xs ${
+                                    isConnectedToWifi
+                                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                                      : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                  }`}
+                                >
+                                  {isConnectedToWifi
+                                    ? "Check In"
+                                    : "Connect to WiFi"}
+                                </Button>
+                              )}
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -727,9 +762,10 @@ const UserDashboard = () => {
                           </div>
                         </div>
                       ))}
+
                     {!isConnectedToWifi && (
                       <div className="mt-4 p-3 bg-warning/10 border border-warning/20 rounded-lg">
-                        <p className="text-sm text-warning-foreground">
+                        <p className="text-sm text-black text-warning-foreground">
                           <strong>Connect to office WiFi</strong> to
                           automatically check in to your reserved desks.
                         </p>
@@ -758,13 +794,13 @@ const UserDashboard = () => {
                   </Button>
                 </div>
                 {userBookings.filter(
-                  (b) => b.status === "completed" || b.status === "cancelled",
+                  (b) => b.status === "completed" || b.status === "cancelled"
                 ).length > 0 ? (
                   <div className="space-y-3 max-h-64 overflow-y-auto">
                     {userBookings
                       .filter(
                         (b) =>
-                          b.status === "completed" || b.status === "cancelled",
+                          b.status === "completed" || b.status === "cancelled"
                       )
                       .map((booking) => (
                         <div
