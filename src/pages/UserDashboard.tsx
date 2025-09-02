@@ -145,23 +145,44 @@ const UserDashboard = () => {
   const [reservedDeskDetails, setReservedDeskDetails] = useState<any>(null);
   const [isReservedDeskModalOpen, setIsReservedDeskModalOpen] = useState(false);
 
+  // Add state for desk status tab
+  const [deskStatusTab, setDeskStatusTab] = useState('all');
+
+  // Desk status tab options
+  const deskStatusTabs = [
+    { label: 'All Desks', value: 'all' },
+    { label: 'Available', value: 'available' },
+    { label: 'Reserved', value: 'reserved' },
+    { label: 'Booked', value: 'booked' },
+    { label: 'Inactive', value: 'inactive' },
+    { label: 'Checked-in', value: 'checked-in' },
+  ];
+
+  // Filter desks by selected tab
+  const filteredDesksByTab = () => {
+    if (deskStatusTab === 'all') return openFloorDesks;
+    return openFloorDesks.filter(desk => desk.status === deskStatusTab);
+  };
+
   const handleDeskCardClick = (deskId: string, status: string) => {
+    const desk = openFloorDesks.find(d => d.id === deskId);
+    if (status === 'reserved') {
+      setReservedDeskDetails({
+        deskId: desk?.id,
+        location: 'Open Floor',
+        user: deskBookings[deskId]?.user || 'Unknown',
+        time: userBookings.find(b => b.deskId === deskId)?.time || 'N/A',
+        date: userBookings.find(b => b.deskId === deskId)?.date || 'N/A',
+      });
+      setIsReservedDeskModalOpen(true);
+      return;
+    }
     if (status === 'available') {
-      const desk = [...openFloorDesks, ...executiveOffices].find(d => d.id === deskId);
       setSelectedDesk(deskId);
       setSelectedDeskType(desk?.type || 'desk');
       setIsBookingModalOpen(true);
-    } else if (status === 'reserved' || status === 'booked') {
-      // Show reserved desk details modal
-      setReservedDeskDetails({
-        deskId,
-        user: deskBookings[deskId]?.user || 'Unknown',
-        status: deskBookings[deskId]?.status || status,
-        // Add more info as needed (e.g., department, reservation date)
-        reservationDate: userBookings.find(b => b.deskId === deskId)?.date || 'N/A',
-      });
-      setIsReservedDeskModalOpen(true);
     }
+    // Optionally handle booked, inactive, checked-in as needed
   };
 
   // --- Desk state management for available/booked lists ---
@@ -639,17 +660,22 @@ const UserDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <DeskFilter 
-                  selectedFilter={selectedFilter}
-                  onFilterChange={setSelectedFilter}
-                  deskCounts={{
-                    ...getDeskCounts(),
-                    available: availableDesks.length,
-                    booked: bookedDesks.length
-                  }}
-                />
+                {/* Desk Status Tabs */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {deskStatusTabs.map(tab => (
+                    <Button
+                      key={tab.value}
+                      variant={deskStatusTab === tab.value ? 'default' : 'outline'}
+                      size="sm"
+                      className="capitalize"
+                      onClick={() => setDeskStatusTab(tab.value)}
+                    >
+                      {tab.label}
+                    </Button>
+                  ))}
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-                  {availableDesks.map((desk) => (
+                  {filteredDesksByTab().map((desk) => (
                     <DeskCard
                       key={desk.id}
                       desk={desk}
@@ -658,37 +684,14 @@ const UserDashboard = () => {
                     />
                   ))}
                 </div>
-                {availableDesks.length === 0 && (
+                {filteredDesksByTab().length === 0 && (
                   <p className="text-center text-muted-foreground py-8">
-                    No desks available.
+                    No desks match the selected filter.
                   </p>
                 )}
               </CardContent>
             </Card>
-            <Card className="shadow-custom-md mt-6">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold text-primary">
-                  Booked Desks
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-                  {bookedDesks.map((desk) => (
-                    <DeskCard
-                      key={desk.id}
-                      desk={{ ...desk, status: 'booked' }}
-                      onClick={handleDeskCardClick}
-                      bookedBy={deskBookings[desk.id]?.user}
-                    />
-                  ))}
-                </div>
-                {bookedDesks.length === 0 && (
-                  <p className="text-center text-muted-foreground py-8">
-                    No desks are currently booked.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+         
           </TabsContent>
 
           <TabsContent value="executive-suite" className="space-y-6">
@@ -818,13 +821,15 @@ const UserDashboard = () => {
       />
 
       {/* Reserved Desk Details Modal */}
-      {isReservedDeskModalOpen && (
+      {isReservedDeskModalOpen && reservedDeskDetails && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm animate-fade-in">
             <h3 className="text-lg font-bold mb-2 text-primary">Reserved Desk Details</h3>
             <p><strong>Desk:</strong> {reservedDeskDetails.deskId}</p>
+            <p><strong>Location:</strong> {reservedDeskDetails.location}</p>
             <p><strong>Reserved By:</strong> {reservedDeskDetails.user}</p>
-            <p><strong>Reservation Date:</strong> {reservedDeskDetails.reservationDate}</p>
+            <p><strong>Date:</strong> {reservedDeskDetails.date}</p>
+            <p><strong>Time:</strong> {reservedDeskDetails.time}</p>
             <div className="mt-4 flex justify-end">
               <Button onClick={() => setIsReservedDeskModalOpen(false)} variant="outline">Close</Button>
             </div>
