@@ -34,7 +34,7 @@ import { Link, useNavigate } from "react-router-dom";
 const UserDashboard = () => {
   const [selectedDesk, setSelectedDesk] = useState<string | null>(null);
   const [selectedDeskType, setSelectedDeskType] = useState<"desk" | "office">(
-    "desk"
+    "desk",
   );
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
@@ -231,7 +231,6 @@ const UserDashboard = () => {
         // Compare the api
         const connected = allowedIPs.includes(data.ip);
         setIsConnectedToWifi(connected);
-        
       } catch (error) {
         console.error("Failed to check Wifi/IP:", error);
         setIsConnectedToWifi(false);
@@ -242,15 +241,15 @@ const UserDashboard = () => {
     const interval = setInterval(checkwifi, 30000);
     return () => clearInterval(interval);
   }, []);
-  
+
   useEffect(() => {
     if (isConnectedToWifi) {
       setUserBookings((prev) =>
         prev.map((booking) =>
           booking.status === "reserved"
             ? { ...booking, status: "checked-in" }
-            : booking
-        )
+            : booking,
+        ),
       );
     }
   }, [isConnectedToWifi]);
@@ -314,7 +313,7 @@ const UserDashboard = () => {
     deskId: string,
     date: string,
     time: string,
-    type: "desk" | "office"
+    type: "desk" | "office",
   ) => {
     const newBooking = {
       id: Date.now().toString(),
@@ -347,14 +346,14 @@ const UserDashboard = () => {
   const handleBookingReschedule = (
     bookingId: string,
     newDate: string,
-    newTime: string
+    newTime: string,
   ) => {
     setUserBookings((prev) =>
       prev.map((booking) =>
         booking.id === bookingId
           ? { ...booking, date: newDate, time: newTime }
-          : booking
-      )
+          : booking,
+      ),
     );
 
     toast({
@@ -381,8 +380,8 @@ const UserDashboard = () => {
     }
     setAllDesks((prev) =>
       prev.map((d) =>
-        d.id === booking?.deskId ? { ...d, status: "available" } : d
-      )
+        d.id === booking?.deskId ? { ...d, status: "available" } : d,
+      ),
     );
     toast({
       title: "Booking Cancelled",
@@ -400,8 +399,8 @@ const UserDashboard = () => {
       prevBookings.map((booking) =>
         booking.id === bookingId
           ? { ...booking, status: "checked-in" }
-          : booking
-      )
+          : booking,
+      ),
     );
     setIsCheckInModalOpen(false);
   };
@@ -410,7 +409,7 @@ const UserDashboard = () => {
     const csvData = prepareBookingHistoryData(userBookings);
     downloadCSV(
       csvData,
-      `chieta-desk-bookings-${new Date().toISOString().split("T")[0]}`
+      `chieta-desk-bookings-${new Date().toISOString().split("T")[0]}`,
     );
     toast({
       title: "Download Complete",
@@ -421,7 +420,7 @@ const UserDashboard = () => {
   // Handler for meeting room booking modal
   const [isMeetingRoomModalOpen, setIsMeetingRoomModalOpen] = useState(false);
   const [selectedMeetingRoom, setSelectedMeetingRoom] = useState<string | null>(
-    null
+    null,
   );
   const handleMeetingRoomClick = (roomId: string) => {
     setSelectedMeetingRoom(roomId);
@@ -794,13 +793,13 @@ const UserDashboard = () => {
                   </Button>
                 </div>
                 {userBookings.filter(
-                  (b) => b.status === "completed" || b.status === "cancelled"
+                  (b) => b.status === "completed" || b.status === "cancelled",
                 ).length > 0 ? (
                   <div className="space-y-3 max-h-64 overflow-y-auto">
                     {userBookings
                       .filter(
                         (b) =>
-                          b.status === "completed" || b.status === "cancelled"
+                          b.status === "completed" || b.status === "cancelled",
                       )
                       .map((booking) => (
                         <div
@@ -1031,13 +1030,6 @@ const UserDashboard = () => {
         }}
         booking={selectedBooking}
         onCancel={handleBookingCancel}
-      />
-
-      <CheckInModal
-        isOpen={isCheckInModalOpen}
-        onClose={() => setIsCheckInModalOpen(false)}
-        booking={selectedBooking}
-        onCheckIn={handleCheckIn}
       />
 
       {/* Booking Modal for Meeting Rooms */}
