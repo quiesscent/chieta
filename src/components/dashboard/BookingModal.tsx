@@ -93,7 +93,7 @@ export const BookingModal = ({ isOpen, onClose, deskId, deskType = 'desk', onCon
               <Calendar className="h-4 w-4" />
               <span>Select Date</span>
             </Label>
-            {isBoardRoom ? (
+            {deskType === 'office' || isBoardRoom ? (
               <input
                 type="date"
                 min={formatDate(today)}
@@ -145,7 +145,7 @@ export const BookingModal = ({ isOpen, onClose, deskId, deskType = 'desk', onCon
               <h4 className="font-medium text-primary">Booking Summary</h4>
               <div className="text-sm text-muted-foreground space-y-1">
                 <p><strong>{deskType === 'office' ? 'Office' : 'Desk'}:</strong> {deskId}</p>
-                <p><strong>Date:</strong> {selectedDate === formatDate(today) ? 'Today' : 'Tomorrow'}</p>
+                <p><strong>Date:</strong> {isBoardRoom ? formatDisplayDate(new Date(selectedDate)) : (selectedDate === formatDate(today) ? 'Today' : 'Tomorrow')}</p>
                 <p><strong>Time:</strong> {selectedTime}</p>
               </div>
             </div>
@@ -176,9 +176,19 @@ export const BookingModal = ({ isOpen, onClose, deskId, deskType = 'desk', onCon
         <div className="text-xs text-muted-foreground bg-muted/20 rounded-lg p-3 animate-fade-in">
           <p className="font-medium mb-1">Booking Policy:</p>
           <ul className="space-y-1">
-            <li>• Bookings can only be made for today or tomorrow</li>
-            <li>• Connect to office WiFi to automatically check in</li>
-            <li>• Cancel bookings at least 2 hours in advance</li>
+            {isBoardRoom ? (
+              <>
+                <li>• Bookings can be made for any future date from today onwards</li>
+                <li>• Connect to office WiFi to automatically check in</li>
+                <li>• Cancel bookings at least 2 hours in advance</li>
+              </>
+            ) : (
+              <>
+                <li>• Bookings can only be made for today or tomorrow</li>
+                <li>• Connect to office WiFi to automatically check in</li>
+                <li>• Cancel bookings at least 2 hours in advance</li>
+              </>
+            )}
           </ul>
         </div>
       </DialogContent>
