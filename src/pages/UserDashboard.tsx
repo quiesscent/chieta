@@ -226,6 +226,12 @@ const UserDashboard = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Add user context for bookings
+  const [allDesks, setAllDesks] = useState(openFloorDesks);
+  const [deskBookings, setDeskBookings] = useState<{[deskId: string]: { user: string, status: string } | null}>({});
+  const userName = localStorage.getItem('userName') || 'You';
+  const userType = localStorage.getItem('userType') || 'user';
+
   // Simulate WiFi connection check
   useEffect(() => {
     // Random simulation of office WiFi connection
@@ -240,95 +246,69 @@ const UserDashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
+const [reservedDeskDetails, setReservedDeskDetails] = useState<any>(null);
+  const [isReservedDeskModalOpen, setIsReservedDeskModalOpen] = useState(false);
+
   const handleDeskCardClick = (deskId: string, status: string) => {
-    if (status === "available") {
-      const desk = [...openFloorDesks, ...executiveOffices].find(
-        (d) => d.id === deskId,
-      );
+    if (status === 'available') {
+      const desk = [...openFloorDesks, ...executiveOffices].find(d => d.id === deskId);
       setSelectedDesk(deskId);
-      setSelectedDeskType(desk?.type || "desk");
+      setSelectedDeskType(desk?.type || 'desk');
       setIsBookingModalOpen(true);
-    } else if (status === "reserved" || status === "booked") {
-      // Check if this is user's booking and they're on WiFi
-      const userBooking = userBookings.find(
-        (b) =>
-          b.deskId === deskId &&
-          (b.status === "reserved" || b.status === "booked"),
-      );
-      if (userBooking && isConnectedToWifi) {
-        // Auto check-in
-        setUserBookings((prev) =>
-          prev.map((b) =>
-            b.id === userBooking.id ? { ...b, status: "checked-in" } : b,
-          ),
-        );
-        toast({
-          title: "Checked In Successfully!",
-          description: `You're now checked in at ${deskId}`,
-        });
-      } else if (userBooking && !isConnectedToWifi) {
-        toast({
-          title: "Not Connected to Office WiFi",
-          description: "Please connect to office WiFi to check in",
-          variant: "destructive",
-        });
-      }
+    } else if (status === 'reserved' || status === 'booked') {
+      // Show reserved desk details modal
+      setReservedDeskDetails({
+        deskId,
+        user: deskBookings[deskId]?.user || 'Unknown',
+        status: deskBookings[deskId]?.status || status,
+        // Add more info as needed (e.g., department, reservation date)
+        reservationDate: userBookings.find(b => b.deskId === deskId)?.date || 'N/A',
+      });
+      setIsReservedDeskModalOpen(true);
     }
   };
 
-  const handleBookingConfirm = (
-    deskId: string,
-    date: string,
-    time: string,
-    type: "desk" | "office",
-  ) => {
+  // Update booking logic to set desk as reserved/booked and store user
+  const handleBookingConfirm = (deskId: string, date: string, time: string, type: 'desk' | 'office') => {
     const newBooking = {
       id: Date.now().toString(),
       deskId,
       date,
       time,
-      status: "reserved" as const,
-      type,
+      status: 'reserved' as const,
+      type
     };
-
-    setUserBookings((prev) => [...prev, newBooking]);
-
-    // Set booking details for confirmation modal
-    setBookingDetails({
-      deskId,
-      date,
-      time,
-      type,
-    });
-
+    setUserBookings(prev => [...prev, newBooking]);
+    setDeskBookings(prev => ({ ...prev, [deskId]: { user: userName, status: 'reserved' } }));
+    setAllDesks(prev => prev.map(d => d.id === deskId ? { ...d, status: 'reserved' } : d));
+    setBookingDetails({ deskId, date, time, type });
     setIsBookingModalOpen(false);
     setSelectedDesk(null);
     setIsConfirmationModalOpen(true);
   };
 
-  const handleBookingReschedule = (
-    bookingId: string,
-    newDate: string,
-    newTime: string,
-  ) => {
-    setUserBookings((prev) =>
-      prev.map((booking) =>
-        booking.id === bookingId
+  const handleBookingReschedule = (bookingId: string, newDate: string, newTime: string) => {
+    setUserBookings(prev => 
+      prev.map(booking => 
+        booking.id === bookingId 
           ? { ...booking, date: newDate, time: newTime }
-          : booking,
-      ),
+          : booking
+      )
     );
-
+    
     toast({
       title: "Booking Rescheduled",
       description: "Your booking has been successfully rescheduled.",
     });
   };
 
-  const handleBookingCancel = (bookingId: string) => {
-    const booking = userBookings.find((b) => b.id === bookingId);
-    setUserBookings((prev) => prev.filter((b) => b.id !== bookingId));
 
+  const handleBookingCancel = (bookingId: string) => {
+
+    const booking = userBookings.find(b => b.id === bookingId);
+    setUserBookings(prev => prev.filter(b => b.id !== bookingId));
+    setDeskBookings(prev => ({ ...prev, [booking?.deskId!]: null }));
+    setAllDesks(prev => prev.map(d => d.id === booking?.deskId ? { ...d, status: 'available' } : d));
     toast({
       title: "Booking Cancelled",
       description: `Your booking for ${booking?.deskId} has been cancelled.`,
@@ -361,6 +341,18 @@ const UserDashboard = () => {
       title: "Download Complete",
       description: "Your booking history has been downloaded as CSV.",
     });
+  };
+
+  // Handler for meeting room booking modal
+  const [isMeetingRoomModalOpen, setIsMeetingRoomModalOpen] = useState(false);
+  const [selectedMeetingRoom, setSelectedMeetingRoom] = useState<string | null>(null);
+  const handleMeetingRoomClick = (roomId: string) => {
+    setSelectedMeetingRoom(roomId);
+    setIsMeetingRoomModalOpen(true);
+  };
+  const handleBoardRoomClick = () => {
+    setSelectedMeetingRoom('Board Room');
+    setIsMeetingRoomModalOpen(true);
   };
 
   // Filter functions
@@ -595,90 +587,77 @@ const UserDashboard = () => {
               </TabsContent>
 
               <TabsContent value="upcoming" className="space-y-3 mt-4">
-                {userBookings.filter((b) => b.status === "reserved").length >
-                0 ? (
+                {userBookings.filter(b => b.status === 'reserved').length > 0 ? (
                   <div className="space-y-3">
-                    {userBookings
-                      .filter((b) => b.status === "reserved")
-                      .map((booking) => (
-                        <div
-                          key={booking.id}
-                          className={`flex flex-col lg:flex-row lg:items-center lg:justify-between p-4 bg-orange-50 border border-orange-200 rounded-lg space-y-3 lg:space-y-0 transition-colors ${
-                            booking.status === "reserved"
-                              ? "cursor-pointer hover:bg-orange-100 hover:shadow-md"
-                              : "cursor-default"
-                          }`}
-                          onClick={() =>
-                            booking.status === "reserved"
-                              ? handleReservedBookingClick(booking)
-                              : undefined
-                          }
-                        >
-                          <div className="flex items-center space-x-4">
-                            <div className="bg-orange-500 p-2 rounded-lg">
-                              <MapPin className="h-4 w-4 text-white" />
-                            </div>
-                            <div>
-                              <p className="font-semibold text-primary">
-                                Desk {booking.deskId}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {booking.date} at {booking.time}
-                              </p>
-                            </div>
+                    {userBookings.filter(b => b.status === 'reserved').map((booking) => (
+                       <div 
+                         key={booking.id}
+                         className={`flex flex-col lg:flex-row lg:items-center lg:justify-between p-4 bg-orange-50 border border-orange-200 rounded-lg space-y-3 lg:space-y-0 transition-colors ${
+                           booking.status === 'reserved' 
+                             ? 'cursor-pointer hover:bg-orange-100 hover:shadow-md' 
+                             : 'cursor-default'
+                         }`}
+                         onClick={() => booking.status === 'reserved' ? handleReservedBookingClick(booking) : undefined}
+                       >
+                        <div className="flex items-center space-x-4">
+                          <div className="bg-orange-500 p-2 rounded-lg">
+                            <MapPin className="h-4 w-4 text-white" />
                           </div>
-
-                          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 lg:items-center">
-                            <Badge variant="secondary" className="w-fit">
-                              Reserved{" "}
-                              {isConnectedToWifi
-                                ? "• Can Check In"
-                                : "• Need WiFi"}
-                            </Badge>
-                            <div className="flex space-x-2">
-                              {booking.status === "reserved" && (
-                                <Button
-                                  size="sm"
-                                  variant="default"
-                                  onClick={() =>
-                                    handleReservedBookingClick(booking)
-                                  }
-                                  className="text-xs bg-primary text-primary-foreground"
-                                >
-                                  Check In
-                                </Button>
-                              )}
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setSelectedBooking(booking);
-                                  setIsRescheduleModalOpen(true);
-                                }}
-                                className="text-xs"
-                              >
-                                Reschedule
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setSelectedBooking(booking);
-                                  setIsCancelModalOpen(true);
-                                }}
-                                className="text-xs text-destructive hover:text-destructive"
-                              >
-                                Cancel
-                              </Button>
-                            </div>
+                          <div>
+                            <p className="font-semibold text-primary">
+                              Desk {booking.deskId}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {booking.date} at {booking.time}
+                            </p>
                           </div>
                         </div>
-                      ))}
+                        
+                        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 lg:items-center">
+                          <Badge variant="secondary" className="w-fit">
+                            Reserved {isConnectedToWifi ? '• Can Check In' : '• Need WiFi'}
+                          </Badge>
+                           <div className="flex space-x-2">
+                             {/* {booking.status === 'reserved' && (
+                               <Button 
+                                 size="sm" 
+                                 variant="default"
+                                 onClick={() => handleReservedBookingClick(booking)}
+                                 className="text-xs bg-primary text-primary-foreground"
+                               >
+                                 Check In
+                               </Button>
+                             )} */}
+                             <Button 
+                               size="sm" 
+                               variant="outline"
+                               onClick={() => {
+                                 setSelectedBooking(booking);
+                                 setIsRescheduleModalOpen(true);
+                               }}
+                               className="text-xs"
+                             >
+                               Reschedule
+                             </Button>
+                             <Button 
+                               size="sm" 
+                               variant="outline"
+                               onClick={() => {
+                                 setSelectedBooking(booking);
+                                 setIsCancelModalOpen(true);
+                               }}
+                               className="text-xs text-destructive hover:text-destructive"
+                             >
+                               Cancel
+                             </Button>
+                           </div>
+                        </div>
+                      </div>
+                    ))}
                     {!isConnectedToWifi && (
                       <div className="mt-4 p-3 bg-warning/10 border border-warning/20 rounded-lg">
                         <p className="text-sm text-warning-foreground">
-                          <strong>Connect to office WiFi</strong> to
-                          automatically check in to your reserved desks.
+                          <strong>Connect to office WiFi</strong> to automatically check in to your reserved desks.
                         </p>
                       </div>
                     )}
@@ -690,66 +669,47 @@ const UserDashboard = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="history" className="space-y-3 mt-4">
+                <TabsContent value="history" className="space-y-3 mt-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-2 sm:space-y-0">
-                  <h3 className="text-lg font-semibold text-primary">
-                    Booking History
-                  </h3>
-                  <Button
+                  <h3 className="text-lg font-semibold text-primary">Booking History</h3>
+                  <Button 
                     onClick={handleDownloadCSV}
-                    variant="outline"
+                    variant="outline" 
                     size="sm"
                     className="self-start sm:self-auto"
                   >
                     Download CSV
                   </Button>
                 </div>
-                {userBookings.filter(
-                  (b) => b.status === "completed" || b.status === "cancelled",
-                ).length > 0 ? (
+                {userBookings.filter(b => b.status === 'completed' || b.status === 'cancelled').length > 0 ? (
                   <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {userBookings
-                      .filter(
-                        (b) =>
-                          b.status === "completed" || b.status === "cancelled",
-                      )
-                      .map((booking) => (
-                        <div
-                          key={booking.id}
-                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-secondary/10 rounded-lg space-y-2 sm:space-y-0"
-                        >
-                          <div className="flex items-center space-x-4">
-                            <div
-                              className={`p-2 rounded-lg ${
-                                booking.status === "completed"
-                                  ? "bg-green-500"
-                                  : "bg-red-500"
-                              }`}
-                            >
-                              <MapPin className="h-4 w-4 text-white" />
-                            </div>
-                            <div>
-                              <p className="font-semibold text-primary">
-                                Desk {booking.deskId}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {booking.date} at {booking.time}
-                              </p>
-                            </div>
+                    {userBookings.filter(b => b.status === 'completed' || b.status === 'cancelled').map((booking) => (
+                      <div 
+                        key={booking.id}
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-secondary/10 rounded-lg space-y-2 sm:space-y-0"
+                      >
+                        <div className="flex items-center space-x-4">
+                          <div className={`p-2 rounded-lg ${
+                            booking.status === 'completed' ? 'bg-green-500' : 'bg-red-500'
+                          }`}>
+                            <MapPin className="h-4 w-4 text-white" />
                           </div>
-                          <Badge
-                            variant={
-                              booking.status === "completed"
-                                ? "outline"
-                                : "destructive"
-                            }
-                          >
-                            {booking.status === "completed"
-                              ? "Completed"
-                              : "Cancelled"}
-                          </Badge>
+                          <div>
+                            <p className="font-semibold text-primary">
+                              Desk {booking.deskId}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {booking.date} at {booking.time}
+                            </p>
+                          </div>
                         </div>
-                      ))}
+                        <Badge 
+                          variant={booking.status === 'completed' ? 'outline' : 'destructive'}
+                        >
+                          {booking.status === 'completed' ? 'Completed' : 'Cancelled'}
+                        </Badge>
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <p className="text-muted-foreground text-center py-8">
@@ -763,11 +723,12 @@ const UserDashboard = () => {
 
         {/* Floor Plan and Desk Management */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="open-floor">Open Floor Plan</TabsTrigger>
             <TabsTrigger value="executive-suite">Executive Suite</TabsTrigger>
+            <TabsTrigger value="meeting-rooms">Meeting Rooms</TabsTrigger>
           </TabsList>
-
+          
           <TabsContent value="open-floor" className="space-y-6">
             <Card className="shadow-custom-md">
               <CardHeader>
@@ -779,10 +740,7 @@ const UserDashboard = () => {
                 </p>
               </CardHeader>
               <CardContent>
-                <FloorPlan
-                  onDeskClick={handleDeskCardClick}
-                  userBookings={userBookings}
-                />
+                <FloorPlan onDeskClick={handleDeskCardClick} userBookings={userBookings} />
               </CardContent>
             </Card>
 
@@ -794,7 +752,7 @@ const UserDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <DeskFilter
+                <DeskFilter 
                   selectedFilter={selectedFilter}
                   onFilterChange={setSelectedFilter}
                   deskCounts={getDeskCounts()}
@@ -805,6 +763,7 @@ const UserDashboard = () => {
                       key={desk.id}
                       desk={desk}
                       onClick={handleDeskCardClick}
+                      bookedBy={deskBookings[desk.id]?.user}
                     />
                   ))}
                 </div>
@@ -828,7 +787,7 @@ const UserDashboard = () => {
                 </p>
               </CardHeader>
               <CardContent>
-                <DeskFilter
+                <DeskFilter 
                   selectedFilter={selectedFilter}
                   onFilterChange={setSelectedFilter}
                   deskCounts={getDeskCounts()}
@@ -847,6 +806,35 @@ const UserDashboard = () => {
                     No offices match the selected filter.
                   </p>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="meeting-rooms" className="space-y-6">
+            <Card className="shadow-custom-md">
+              <CardHeader>
+                <CardTitle className="text-xl font-bold text-primary">
+                  Meeting Rooms
+                </CardTitle>
+                <p className="text-muted-foreground">
+                  Book a meeting room or the board room
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                  {[...Array(7)].map((_, i) => (
+                    <DeskCard
+                      key={`MR-0${i+1}`}
+                      desk={{ id: `MR-0${i+1}`, type: 'office', status: 'available' }}
+                      onClick={() => handleMeetingRoomClick(`MR-0${i+1}`)}
+                    />
+                  ))}
+                  <DeskCard
+                    key="BoardRoom"
+                    desk={{ id: 'Board Room', type: 'office', status: 'available' }}
+                    onClick={() => handleBoardRoomClick()}
+                  />
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -900,6 +888,34 @@ const UserDashboard = () => {
         booking={selectedBooking}
         onCheckIn={handleCheckIn}
       />
+
+      {/* Booking Modal for Meeting Rooms */}
+      <BookingModal
+        isOpen={isMeetingRoomModalOpen}
+        onClose={() => {
+          setIsMeetingRoomModalOpen(false);
+          setSelectedMeetingRoom(null);
+        }}
+        deskId={selectedMeetingRoom}
+        deskType="office"
+        onConfirm={handleBookingConfirm}
+        isBoardRoom={selectedMeetingRoom === 'Board Room'}
+      />
+
+      {/* Reserved Desk Details Modal */}
+      {isReservedDeskModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm animate-fade-in">
+            <h3 className="text-lg font-bold mb-2 text-primary">Reserved Desk Details</h3>
+            <p><strong>Desk:</strong> {reservedDeskDetails.deskId}</p>
+            <p><strong>Reserved By:</strong> {reservedDeskDetails.user}</p>
+            <p><strong>Reservation Date:</strong> {reservedDeskDetails.reservationDate}</p>
+            <div className="mt-4 flex justify-end">
+              <Button onClick={() => setIsReservedDeskModalOpen(false)} variant="outline">Close</Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

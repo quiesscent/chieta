@@ -264,10 +264,10 @@ const AdminDashboard = () => {
 
             <div className="flex items-center space-x-2 sm:space-x-4">
               <Link to="/profile">
-                <Button variant="ghost" size="sm" className="hidden sm:flex">
+                {/* <Button variant="ghost" size="sm" className="hidden sm:flex">
                   <User className="h-4 w-4 mr-2" />
                   Admin Profile
-                </Button>
+                </Button> */}
                 <Button variant="ghost" size="sm" className="sm:hidden p-2">
                   <User className="h-4 w-4" />
                 </Button>
@@ -470,20 +470,8 @@ const AdminDashboard = () => {
                             <Eye className="h-3 w-3 sm:mr-1" />
                             <span className="hidden sm:inline">View</span>
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedEmployee(employee);
-                              setIsEmployeeUpdateModalOpen(true);
-                            }}
-                            className="text-xs px-2 py-1 h-7 whitespace-nowrap"
-                          >
-                            <Edit className="h-3 w-3 sm:mr-1" />
-                            <span className="hidden sm:inline">Edit</span>
-                          </Button>
-                          <Button
-                            size="sm"
+                          <Button 
+                            size="sm" 
                             variant="outline"
                             onClick={() => {
                               const csvData = prepareEmployeeHistoryData([

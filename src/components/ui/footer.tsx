@@ -9,12 +9,12 @@ export const Footer = () => {
             © {new Date().getFullYear()} Chieta Desk System. All rights reserved.
           </p>
           <div className="flex space-x-6">
-            <Link to="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+            {/* <Link to="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
               Terms & Conditions
-            </Link>
-            <Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+            </Link> */}
+            {/* <Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
               Privacy Policy
-            </Link>
+            </Link> */}
           </div>
         </div>
       </div>

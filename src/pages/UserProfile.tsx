@@ -161,7 +161,7 @@ const UserProfile = () => {
                   <CardTitle className="text-xl font-bold text-primary">
                     Profile Information
                   </CardTitle>
-                  <Button
+                  {/* <Button
                     size="sm"
                     variant={isEditing ? "default" : "outline"}
                     onClick={isEditing ? handleSave : () => setIsEditing(true)}
@@ -175,12 +175,12 @@ const UserProfile = () => {
                         Save
                       </>
                     ) : (
-                      <>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </>
+                    <>
+                   <Edit className="h-4 w-4 mr-2" />
+                       Edit
+                    </>
                     )}
-                  </Button>
+                  </Button> */}
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
