@@ -86,8 +86,8 @@ const Auth = () => {
         }`}>
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
-              <div className="bg-primary/10 p-2 rounded-lg animate-bounce-in">
-                <img src={chietaLogo} alt="CHIETA Logo" className="h-12 w-auto" />
+              <div className="p-2 rounded-lg animate-bounce-in">
+                <img src={chietaLogo} alt="CHIETA Logo" className="h-26 w-auto" />
               </div>
             </div>
             <CardTitle className="text-2xl font-bold text-primary animate-fade-in">
@@ -193,7 +193,7 @@ const Auth = () => {
               </div>
             )}
 
-            <div className="mt-6 text-center animate-fade-in" style={{ animationDelay: '0.7s' }}>
+             {/* <div className="mt-6 text-center animate-fade-in" style={{ animationDelay: '0.7s' }}>
               <button
                 type="button"
                 onClick={() => setIsLogin(!isLogin)}
@@ -205,7 +205,8 @@ const Auth = () => {
                   : "Already have an account? Sign in"
                 }
               </button>
-            </div>
+            </div> */}
+            
           </CardContent>
         </Card>
       </div>

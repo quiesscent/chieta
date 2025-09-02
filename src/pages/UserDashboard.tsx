@@ -13,23 +13,45 @@ import { BookingCancelModal } from "@/components/dashboard/BookingCancelModal";
 import { CheckInModal } from "@/components/dashboard/CheckInModal";
 import { Footer } from "@/components/ui/footer";
 import { useToast } from "@/hooks/use-toast";
-import { downloadCSV, prepareBookingHistoryData, prepareAnalyticsData } from "@/utils/csvExport";
+import {
+  downloadCSV,
+  prepareBookingHistoryData,
+  prepareAnalyticsData,
+} from "@/utils/csvExport";
 import chietaLogo from "@/assets/chieta-logo.jpeg";
-import { 
-  Calendar, 
-  MapPin, 
-  Users, 
-  TrendingUp, 
+import {
+  Calendar,
+  MapPin,
+  Users,
+  TrendingUp,
   LogOut,
   User,
   Wifi,
-  WifiOff
+  WifiOff,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+// import { getUserFromToken } from "@/services/auth.user";
+// import { getProfile } from "@/services/apiClient";
 
 const UserDashboard = () => {
   const [selectedDesk, setSelectedDesk] = useState<string | null>(null);
-  const [selectedDeskType, setSelectedDeskType] = useState<'desk' | 'office'>('desk');
+  const [selectedDeskType, setSelectedDeskType] = useState<"desk" | "office">(
+    "desk",
+  );
+
+  const [profile, setProfile] = useState();
+  // useEffect(() => {
+  //   const fetchProfile = async () => {
+  //     try {
+  //       const data = await getProfile();
+  //       setProfile(data);
+  //     } catch (err) {
+  //       console.error("Failed to fetch profile", err);
+  //     }
+  //   };
+  //   fetchProfile();
+  // }, []);
+
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
@@ -43,14 +65,56 @@ const UserDashboard = () => {
   const [activeBookingTab, setActiveBookingTab] = useState("current");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [userBookings, setUserBookings] = useState([
-    { id: "1", deskId: "OP-15", date: "2024-01-15", time: "09:30", status: "checked-in", type: "desk" },
-    { id: "2", deskId: "OP-22", date: "2024-01-16", time: "10:00", status: "reserved", type: "desk" },
-    { id: "3", deskId: "E-02", date: "2024-01-17", time: "14:00", status: "reserved", type: "office" },
-    { id: "4", deskId: "OP-08", date: "2024-01-14", time: "09:00", status: "completed", type: "desk" },
-    { id: "5", deskId: "OP-33", date: "2024-01-13", time: "13:30", status: "completed", type: "desk" },
-    { id: "6", deskId: "E-01", date: "2024-01-12", time: "11:00", status: "cancelled", type: "office" },
+    {
+      id: "1",
+      deskId: "OP-15",
+      date: "2024-01-15",
+      time: "09:30",
+      status: "checked-in",
+      type: "desk",
+    },
+    {
+      id: "2",
+      deskId: "OP-22",
+      date: "2024-01-16",
+      time: "10:00",
+      status: "reserved",
+      type: "desk",
+    },
+    {
+      id: "3",
+      deskId: "E-02",
+      date: "2024-01-17",
+      time: "14:00",
+      status: "reserved",
+      type: "office",
+    },
+    {
+      id: "4",
+      deskId: "OP-08",
+      date: "2024-01-14",
+      time: "09:00",
+      status: "completed",
+      type: "desk",
+    },
+    {
+      id: "5",
+      deskId: "OP-33",
+      date: "2024-01-13",
+      time: "13:30",
+      status: "completed",
+      type: "desk",
+    },
+    {
+      id: "6",
+      deskId: "E-01",
+      date: "2024-01-12",
+      time: "11:00",
+      status: "cancelled",
+      type: "office",
+    },
   ]);
-  
+
   // Sample desk data for open floor plan - Updated to match OP format
   const openFloorDesks = [
     { id: "OP-01", type: "desk" as const, status: "available" as const },
@@ -109,16 +173,56 @@ const UserDashboard = () => {
 
   // Sample executive office data
   const executiveOffices = [
-    { id: "E-01", type: "office" as const, status: "available" as const, capacity: 1 },
-    { id: "E-02", type: "office" as const, status: "reserved" as const, capacity: 2 },
-    { id: "E-03", type: "office" as const, status: "available" as const, capacity: 1 },
-    { id: "E-04", type: "office" as const, status: "checked-in" as const, capacity: 2 },
-    { id: "E-05", type: "office" as const, status: "available" as const, capacity: 4 },
-    { id: "E-06", type: "office" as const, status: "unavailable" as const, capacity: 1 },
-    { id: "E-07", type: "office" as const, status: "available" as const, capacity: 2 },
-    { id: "E-08", type: "office" as const, status: "inactive" as const, capacity: 1 },
+    {
+      id: "E-01",
+      type: "office" as const,
+      status: "available" as const,
+      capacity: 1,
+    },
+    {
+      id: "E-02",
+      type: "office" as const,
+      status: "reserved" as const,
+      capacity: 2,
+    },
+    {
+      id: "E-03",
+      type: "office" as const,
+      status: "available" as const,
+      capacity: 1,
+    },
+    {
+      id: "E-04",
+      type: "office" as const,
+      status: "checked-in" as const,
+      capacity: 2,
+    },
+    {
+      id: "E-05",
+      type: "office" as const,
+      status: "available" as const,
+      capacity: 4,
+    },
+    {
+      id: "E-06",
+      type: "office" as const,
+      status: "unavailable" as const,
+      capacity: 1,
+    },
+    {
+      id: "E-07",
+      type: "office" as const,
+      status: "available" as const,
+      capacity: 2,
+    },
+    {
+      id: "E-08",
+      type: "office" as const,
+      status: "inactive" as const,
+      capacity: 1,
+    },
   ];
-  
+
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -142,7 +246,7 @@ const UserDashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const [reservedDeskDetails, setReservedDeskDetails] = useState<any>(null);
+const [reservedDeskDetails, setReservedDeskDetails] = useState<any>(null);
   const [isReservedDeskModalOpen, setIsReservedDeskModalOpen] = useState(false);
 
   const handleDeskCardClick = (deskId: string, status: string) => {
@@ -198,12 +302,13 @@ const UserDashboard = () => {
     });
   };
 
+
   const handleBookingCancel = (bookingId: string) => {
+
     const booking = userBookings.find(b => b.id === bookingId);
     setUserBookings(prev => prev.filter(b => b.id !== bookingId));
     setDeskBookings(prev => ({ ...prev, [booking?.deskId!]: null }));
     setAllDesks(prev => prev.map(d => d.id === booking?.deskId ? { ...d, status: 'available' } : d));
-    
     toast({
       title: "Booking Cancelled",
       description: `Your booking for ${booking?.deskId} has been cancelled.`,
@@ -216,19 +321,22 @@ const UserDashboard = () => {
   };
 
   const handleCheckIn = (bookingId: string) => {
-    setUserBookings(prevBookings => 
-      prevBookings.map(booking => 
-        booking.id === bookingId 
-          ? { ...booking, status: 'checked-in' }
-          : booking
-      )
+    setUserBookings((prevBookings) =>
+      prevBookings.map((booking) =>
+        booking.id === bookingId
+          ? { ...booking, status: "checked-in" }
+          : booking,
+      ),
     );
     setIsCheckInModalOpen(false);
   };
 
   const handleDownloadCSV = () => {
     const csvData = prepareBookingHistoryData(userBookings);
-    downloadCSV(csvData, `chieta-desk-bookings-${new Date().toISOString().split('T')[0]}`);
+    downloadCSV(
+      csvData,
+      `chieta-desk-bookings-${new Date().toISOString().split("T")[0]}`,
+    );
     toast({
       title: "Download Complete",
       description: "Your booking history has been downloaded as CSV.",
@@ -254,30 +362,31 @@ const UserDashboard = () => {
 
   const getFilteredDesks = () => {
     const currentDesks = getCurrentDesks();
-    if (selectedFilter === 'all') return currentDesks;
-    return currentDesks.filter(desk => desk.status === selectedFilter);
+    if (selectedFilter === "all") return currentDesks;
+    return currentDesks.filter((desk) => desk.status === selectedFilter);
   };
 
   const getDeskCounts = () => {
     const currentDesks = getCurrentDesks();
     return {
       all: currentDesks.length,
-      available: currentDesks.filter(d => d.status === 'available').length,
-      reserved: currentDesks.filter(d => d.status === 'reserved').length,
-      booked: currentDesks.filter(d => d.status === 'booked').length,
-      'checked-in': currentDesks.filter(d => d.status === 'checked-in').length,
-      inactive: currentDesks.filter(d => d.status === 'inactive').length,
+      available: currentDesks.filter((d) => d.status === "available").length,
+      reserved: currentDesks.filter((d) => d.status === "reserved").length,
+      booked: currentDesks.filter((d) => d.status === "booked").length,
+      "checked-in": currentDesks.filter((d) => d.status === "checked-in")
+        .length,
+      inactive: currentDesks.filter((d) => d.status === "inactive").length,
     };
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('userType');
-    localStorage.removeItem('userEmail');
+    localStorage.removeItem("userType");
+    localStorage.removeItem("userEmail");
     toast({
       title: "Successfully Logged Out",
       description: "See you next time!",
     });
-    navigate('/');
+    navigate("/");
   };
 
   const stats = [
@@ -285,26 +394,26 @@ const UserDashboard = () => {
       title: "Total Bookings",
       value: userBookings.length.toString(),
       icon: Calendar,
-      description: "This month"
+      description: "This month",
     },
     {
       title: "Available Desks",
       value: "24",
       icon: MapPin,
-      description: "Right now"
+      description: "Right now",
     },
     {
       title: "Unavailable Desks",
       value: "8",
       icon: Users,
-      description: "Currently occupied"
+      description: "Currently occupied",
     },
     {
       title: "Office Visits",
       value: "12",
       icon: TrendingUp,
-      description: "This month"
-    }
+      description: "This month",
+    },
   ];
 
   return (
@@ -314,15 +423,18 @@ const UserDashboard = () => {
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16 gap-2">
             <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
-              <div className="bg-secondary p-1.5 sm:p-2 rounded-lg flex items-center">
-                <img src={chietaLogo} alt="Chieta Logo" className="h-6 w-6 mr-2" />
-                <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-secondary-foreground" />
+              <div className="p-1.5 sm:p-2 rounded-lg flex items-center">
+                <img
+                  src={chietaLogo}
+                  alt="Chieta Logo"
+                  className="h-10 w-20 mr-2"
+                />
+                {/*<MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-secondary-foreground" />*/}
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg sm:text-xl font-bold text-primary truncate flex items-center">
+                {/*<h1 className="text-lg sm:text-xl font-bold text-primary truncate flex items-center">
                   Chieta Desk System
-                </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">User Dashboard</p>
+                </h1>*/}
               </div>
             </div>
 
@@ -361,11 +473,21 @@ const UserDashboard = () => {
                 </Button>
               </Link>
 
-              <Button variant="outline" size="sm" onClick={handleLogout} className="hidden sm:flex">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                className="hidden sm:flex"
+              >
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
-              <Button variant="outline" size="sm" onClick={handleLogout} className="sm:hidden p-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                className="sm:hidden p-2"
+              >
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
@@ -377,7 +499,7 @@ const UserDashboard = () => {
         {/* Welcome Section */}
         <div className="mb-6 sm:mb-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-primary mb-2">
-            Welcome back, User!
+            Welcome back, {profile?.first_name}!
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground">
             Manage your desk bookings and check your office visit analytics.
@@ -387,7 +509,7 @@ const UserDashboard = () => {
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
           {stats.map((stat, index) => (
-            <Card 
+            <Card
               key={stat.title}
               className="animate-fade-in hover:shadow-custom-md transition-all duration-300"
               style={{ animationDelay: `${index * 0.1}s` }}
@@ -428,33 +550,34 @@ const UserDashboard = () => {
                 <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
                 <TabsTrigger value="history">History</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="current" className="space-y-3 mt-4">
-                {userBookings.filter(b => b.status === 'checked-in').length > 0 ? (
+                {userBookings.filter((b) => b.status === "checked-in").length >
+                0 ? (
                   <div className="space-y-3">
-                    {userBookings.filter(b => b.status === 'checked-in').map((booking) => (
-                      <div 
-                        key={booking.id}
-                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-2 sm:space-y-0"
-                      >
-                        <div className="flex items-center space-x-4">
-                          <div className="bg-blue-500 p-2 rounded-lg">
-                            <MapPin className="h-4 w-4 text-white" />
+                    {userBookings
+                      .filter((b) => b.status === "checked-in")
+                      .map((booking) => (
+                        <div
+                          key={booking.id}
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-2 sm:space-y-0"
+                        >
+                          <div className="flex items-center space-x-4">
+                            <div className="bg-blue-500 p-2 rounded-lg">
+                              <MapPin className="h-4 w-4 text-white" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-primary">
+                                Desk {booking.deskId}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {booking.date} at {booking.time}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-semibold text-primary">
-                              Desk {booking.deskId}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {booking.date} at {booking.time}
-                            </p>
-                          </div>
+                          <Badge variant="default">Currently Checked In</Badge>
                         </div>
-                        <Badge variant="default">
-                          Currently Checked In
-                        </Badge>
-                      </div>
-                    ))}
+                      ))}
                   </div>
                 ) : (
                   <p className="text-muted-foreground text-center py-8">
