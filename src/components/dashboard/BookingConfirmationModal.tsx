@@ -129,7 +129,8 @@ export const BookingConfirmationModal = ({
           {/* Action Button */}
           <Button 
             onClick={onClose}
-            className="w-full bg-gradient-primary hover:shadow-custom-md"
+            variant="default"
+            className="w-full text-white shadow-md"
           >
             Got it, thanks!
           </Button>

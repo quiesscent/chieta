@@ -550,41 +550,43 @@ const AdminDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2 sm:gap-3 lg:gap-4">
-              {desks.map((desk) => (
-                <div key={desk.id} className="text-center">
-                  <div
-                    className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full mx-auto mb-1 sm:mb-2 flex items-center justify-center text-xs font-bold text-white cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-lg ${
-                      desk.status === "available"
-                        ? "bg-desk-available hover:bg-green-600"
-                        : desk.status === "unavailable"
-                          ? "bg-desk-unavailable hover:bg-red-600"
-                          : desk.status === "booked"
-                            ? "bg-desk-booked hover:bg-orange-600"
-                            : "bg-desk-inactive hover:bg-gray-600"
-                    }`}
-                    onClick={() => handleDeskClick(desk)}
-                  >
-                    <span className="text-xs sm:text-xs">
-                      {desk.id.split("-")[1]}
-                    </span>
+            <div className="w-full flex justify-center">
+              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2 sm:gap-3 lg:gap-4">
+                {desks.map((desk) => (
+                  <div key={desk.id} className="text-center">
+                    <div
+                      className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full mx-auto mb-1 sm:mb-2 flex items-center justify-center text-xs font-bold text-white cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-lg ${
+                        desk.status === "available"
+                          ? "bg-desk-available hover:bg-green-600"
+                          : desk.status === "unavailable"
+                            ? "bg-desk-unavailable hover:bg-red-600"
+                            : desk.status === "booked"
+                              ? "bg-desk-booked hover:bg-orange-600"
+                              : "bg-desk-inactive hover:bg-gray-600"
+                      }`}
+                      onClick={() => handleDeskClick(desk)}
+                    >
+                      <span className="text-xs sm:text-xs">
+                        {desk.id.split("-")[1]}
+                      </span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeskClick(desk)}
+                      className="w-full h-6 sm:h-7 text-xs px-1 sm:px-2"
+                    >
+                      <Settings className="h-2 w-2 sm:h-3 sm:w-3 mr-0 sm:mr-1" />
+                      <span className="hidden sm:inline">Manage</span>
+                    </Button>
+                    {desk.currentUser && (
+                      <p className="text-xs text-muted-foreground mt-1 truncate max-w-full">
+                        {desk.currentUser.split(" ")[0]}
+                      </p>
+                    )}
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeskClick(desk)}
-                    className="w-full h-6 sm:h-7 text-xs px-1 sm:px-2"
-                  >
-                    <Settings className="h-2 w-2 sm:h-3 sm:w-3 mr-0 sm:mr-1" />
-                    <span className="hidden sm:inline">Manage</span>
-                  </Button>
-                  {desk.currentUser && (
-                    <p className="text-xs text-muted-foreground mt-1 truncate max-w-full">
-                      {desk.currentUser.split(" ")[0]}
-                    </p>
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>

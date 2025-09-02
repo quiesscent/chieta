@@ -165,12 +165,13 @@ export const BookingModal = ({ isOpen, onClose, deskId, deskType = 'desk', onCon
             </Button>
             <Button 
               onClick={handleConfirm}
-              disabled={!selectedDate || !selectedTime}
-              loading={isLoading}
-              className="flex-1 bg-gradient-primary hover:shadow-custom-md"
+              disabled={!selectedDate || !selectedTime || isLoading}
+              variant="default"
+              className="flex-1 font-medium py-2 px-4 rounded-lg shadow-md"
             >
               {isLoading ? "Booking..." : "Confirm Booking"}
             </Button>
+            
           </div>
         </div>
 
