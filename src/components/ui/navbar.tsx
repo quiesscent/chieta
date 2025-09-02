@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Building } from "lucide-react";
 import { Link } from "react-router-dom";
+import logo from "@/assets/chieta-logo.jpeg";
+
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -42,7 +44,8 @@ export const Navbar = () => {
           {/* Logo */}
           <div className="flex items-center space-x-2 min-w-0">
             <div className="bg-secondary p-1.5 sm:p-2 rounded-lg">
-              <img src={require("@/assets/chieta-logo.jpeg")} alt="Chieta Logo" className="h-5 w-5 sm:h-6 sm:w-6" />
+              <img src={logo} alt="Chieta Logo" className="h-5 w-5 sm:h-6 sm:w-6" />
+
             </div>
             <span className="text-lg sm:text-xl font-bold text-primary truncate">Chieta Desk System</span>
           </div>
