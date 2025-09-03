@@ -7,37 +7,77 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, MapPin, Calendar, Clock, Wifi } from "lucide-react";
+import { getMyBookings, confirmBooking } from "@/services/apiClient";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface BookingConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
   bookingDetails: {
+    id: number;
     deskId: string;
     date: string;
     time: string;
-    type: 'desk' | 'office';
+    type: "desk" | "office";
   } | null;
 }
 
-export const BookingConfirmationModal = ({ 
-  isOpen, 
-  onClose, 
-  bookingDetails 
+export const BookingConfirmationModal = ({
+  isOpen,
+  onClose,
+  bookingDetails,
 }: BookingConfirmationModalProps) => {
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getMyBookings()
+      .then((data) => {
+        setBookings(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  const handleConfirm = async (id: number) => {
+    try {
+      await confirmBooking(id);
+      toast.success("Booking confirmed");
+
+      // refresh bookings
+      const updated = await getMyBookings();
+      setBookings(updated);
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  // Auto-confirm when modal opens with booking details
+  useEffect(() => {
+    if (isOpen && bookingDetails?.id) {
+      handleConfirm(bookingDetails.id);
+    }
+  }, [isOpen, bookingDetails]);
+
+  if (loading) return <p>Loading bookings ...</p>;
   if (!bookingDetails) return null;
 
   const formatDate = (dateStr: string) => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    const tomorrowStr = tomorrow.toISOString().split("T")[0];
 
-    if (dateStr === today) return 'Today';
-    if (dateStr === tomorrowStr) return 'Tomorrow';
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric'
+    if (dateStr === today) return "Today";
+    if (dateStr === tomorrowStr) return "Tomorrow";
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -69,7 +109,7 @@ export const BookingConfirmationModal = ({
                 Reserved
               </Badge>
             </div>
-            
+
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <div className="bg-gradient-primary p-2 rounded-lg">
@@ -77,10 +117,13 @@ export const BookingConfirmationModal = ({
                 </div>
                 <div>
                   <p className="font-medium">
-                    {bookingDetails.type === 'office' ? 'Office' : 'Desk'} {bookingDetails.deskId}
+                    {bookingDetails.type === "office" ? "Office" : "Desk"}{" "}
+                    {bookingDetails.deskId}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {bookingDetails.type === 'office' ? 'Executive Suite' : 'Open Floor Plan'}
+                    {bookingDetails.type === "office"
+                      ? "Executive Suite"
+                      : "Open Floor Plan"}
                   </p>
                 </div>
               </div>
@@ -90,12 +133,14 @@ export const BookingConfirmationModal = ({
                   <Calendar className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <div>
-                  <p className="font-medium">{formatDate(bookingDetails.date)}</p>
+                  <p className="font-medium">
+                    {formatDate(bookingDetails.date)}
+                  </p>
                   <p className="text-sm text-muted-foreground">
-                    {new Date(bookingDetails.date).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
+                    {new Date(bookingDetails.date).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
                     })}
                   </p>
                 </div>
@@ -118,16 +163,19 @@ export const BookingConfirmationModal = ({
             <div className="flex items-start space-x-3">
               <Wifi className="h-5 w-5 text-primary mt-0.5" />
               <div>
-                <h5 className="font-medium text-primary mb-1">Check-in Instructions</h5>
+                <h5 className="font-medium text-primary mb-1">
+                  Check-in Instructions
+                </h5>
                 <p className="text-sm text-muted-foreground">
-                  Connect to the office WiFi network when you arrive to automatically check in to your reserved {bookingDetails.type}.
+                  Connect to the office WiFi network when you arrive to
+                  automatically check in to your reserved {bookingDetails.type}.
                 </p>
               </div>
             </div>
           </div>
 
           {/* Action Button */}
-          <Button 
+          <Button
             onClick={onClose}
             variant="default"
             className="w-full text-white shadow-md"

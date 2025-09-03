@@ -110,3 +110,20 @@ export const getProfile = () => fetchAPI("acc/me");
 
 // desks
 export const getDesks = () => fetchAPI("management/desks/");
+
+
+// BOOKINGS
+
+export const createBooking = (data: {
+  deskId: string;
+  date: string;
+  time: string;
+  type: "desk" | "office";
+}) => fetchAPI("bookings/", "POST", data);
+
+// Get all bookings for the logged in user
+export const getMyBookings = () => fetchAPI("bookings/");
+
+// Confirm a booking by ID
+export const confirmBooking = (bookingId: number) =>
+  fetchAPI(`bookings/${bookingId}/confirm/`, "POST");
