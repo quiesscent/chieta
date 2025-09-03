@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Footer } from "@/components/ui/footer";
-import { getProfile } from "@/services/apiClient";
+import { getProfile, userBookedDesks } from "@/services/apiClient";
 
 const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -48,6 +48,24 @@ const UserProfile = () => {
     };
 
     fetchProfile();
+  }, []);
+
+  const [history, setHistory] = useState([]);
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        setIsLoading(true);
+        const data = await userBookedDesks();
+        setHistory(data);
+      } catch (err) {
+        console.error("Failed to fetch Bookings", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBookings();
   }, []);
 
   const [editData, setEditData] = useState(profileData);
@@ -471,7 +489,7 @@ const UserProfile = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {bookingHistory.map((booking) => (
+                  {history.map((booking) => (
                     <div
                       key={booking.id}
                       className="flex items-center justify-between p-4 bg-secondary/10 rounded-lg"
@@ -482,10 +500,11 @@ const UserProfile = () => {
                         </div>
                         <div>
                           <p className="font-semibold text-primary">
-                            Desk {booking.desk}
+                            Desk {booking.desk.name}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {booking.date} • Check-in: {booking.checkInTime}
+                            {booking.checkin_date} • Check-in:{" "}
+                            {booking.checkin_time}
                           </p>
                         </div>
                       </div>

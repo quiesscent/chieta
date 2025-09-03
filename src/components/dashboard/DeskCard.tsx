@@ -6,6 +6,7 @@ interface DeskCardProps {
   desk: {
     id: string;
     type: "desk" | "office";
+    name: string;
     status:
       | "available"
       | "unavailable"
@@ -16,7 +17,7 @@ interface DeskCardProps {
     capacity?: number;
     bookedBy?: string; // Add bookedBy for display
   };
-  onClick: (deskId: string, status: string) => void;
+  onClick: (deskId: string, status: string, deskName: string) => void;
   bookedBy?: string; // Pass bookedBy from parent
 }
 
@@ -66,7 +67,11 @@ export const DeskCard = ({ desk, onClick, bookedBy }: DeskCardProps) => {
   return (
     <Card
       className={`transition-all duration-300 ${getCardStyle(desk?.status)}`}
-      onClick={isClickable ? () => onClick(desk?.id, desk?.status) : undefined}
+      onClick={
+        isClickable
+          ? () => onClick(desk?.name, desk?.status, desk?.name)
+          : undefined
+      }
     >
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
@@ -79,17 +84,20 @@ export const DeskCard = ({ desk, onClick, bookedBy }: DeskCardProps) => {
               </h4>
               {desk?.max_capacity && (
                 <p className="text-xs text-muted-foreground">
-                  Capacity: {desk?.max_capacity}{" "}
+                  Capacity: {desk?.max_capacity}
                   {desk?.max_capacity === 1 ? "person" : `people`}
                 </p>
               )}
-              {/* Show who booked if reserved/booked */}
-              {(desk?.status === "reserved" || desk?.status === "booked") &&
-                bookedBy && (
-                  <p className="text-xs text-warning-foreground mt-1">
-                    Booked by: {bookedBy}
+
+              <h4 className="font-semibold text-primary text-sm mt-2">
+                {desk?.status === "reserved" ? (
+                  <p className="text-xs text-muted-foreground">
+                    Booked by: {desk?.booking?.user?.username}{" "}
                   </p>
+                ) : (
+                  <></>
                 )}
+              </h4>
             </div>
           </div>
 

@@ -30,7 +30,7 @@ import {
   WifiOff,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { getDesks, getProfile } from "@/services/apiClient";
+import { getDesks, getProfile, userBookedDesks } from "@/services/apiClient";
 
 interface Desk {
   id: number;
@@ -108,6 +108,24 @@ const UserDashboard = () => {
       type: "office",
     },
   ]);
+
+  const [history, setHistory] = useState([]);
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        setIsLoading(true);
+        const data = await userBookedDesks();
+        setHistory(data);
+      } catch (err) {
+        console.error("Failed to fetch Bookings", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBookings();
+  }, []);
 
   const [profile, setProfile] = useState([]);
 
@@ -265,7 +283,7 @@ const UserDashboard = () => {
 
   // Simulate WiFi connection check
   useEffect(() => {
-    const allowedIPs = ["105.163.156.44", "197.248.10.99"];
+    const allowedIPs = ["105.163.156.44", "62.8.71.171"];
 
     const checkwifi = async () => {
       try {
@@ -319,6 +337,12 @@ const UserDashboard = () => {
   const filteredDesksByTab = () => {
     if (deskStatusTab === "all") return desks;
     return desks.filter((desk) => desk.status === deskStatusTab);
+  };
+
+  // Filter desks by selected tab
+  const filteredDesksByPlan = () => {
+    if (deskStatusTab === "open floor plan") return desks;
+    return desks.filter((desk) => desk.type === activeTab);
   };
 
   const handleDeskCardClick = (deskId: string, status: string) => {
@@ -478,7 +502,7 @@ const UserDashboard = () => {
 
   // Filter functions
   const getCurrentDesks = () => {
-    return activeTab === "open-floor" ? openFloorDesks : executiveOffices;
+    return activeTab === "open floor plan" ? desks : filteredDesksByPlan();
   };
 
   const getFilteredDesks = () => {
@@ -897,12 +921,12 @@ const UserDashboard = () => {
         {/* Floor Plan and Desk Management */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="open-floor">Open Floor Plan</TabsTrigger>
-            <TabsTrigger value="executive-suite">Executive Suite</TabsTrigger>
-            <TabsTrigger value="meeting-rooms">Meeting Rooms</TabsTrigger>
+            <TabsTrigger value="open floor plan">Open Floor Plan</TabsTrigger>
+            <TabsTrigger value="executive room">Executive Suite</TabsTrigger>
+            <TabsTrigger value="meeting room">Meeting Rooms</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="open-floor" className="space-y-6">
+          <TabsContent value="open floor plan" className="space-y-6">
             <Card className="shadow-custom-md">
               <CardHeader>
                 <CardTitle className="text-xl font-bold text-primary">
@@ -945,7 +969,7 @@ const UserDashboard = () => {
                   ))}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-                  {filteredDesksByTab().map((desk) => (
+                  {filteredDesksByPlan().map((desk) => (
                     <DeskCard
                       key={desk.id}
                       desk={desk}
@@ -963,7 +987,7 @@ const UserDashboard = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="executive-suite" className="space-y-6">
+          <TabsContent value="executive room" className="space-y-6">
             <Card className="shadow-custom-md">
               <CardHeader>
                 <CardTitle className="text-xl font-bold text-primary">
@@ -980,7 +1004,7 @@ const UserDashboard = () => {
                   deskCounts={getDeskCounts()}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-                  {getFilteredDesks().map((office) => (
+                  {filteredDesksByPlan().map((office) => (
                     <DeskCard
                       key={office.id}
                       desk={office}
@@ -997,7 +1021,7 @@ const UserDashboard = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="meeting-rooms" className="space-y-6">
+          <TabsContent value="meeting room" className="space-y-6">
             <Card className="shadow-custom-md">
               <CardHeader>
                 <CardTitle className="text-xl font-bold text-primary">
@@ -1009,26 +1033,13 @@ const UserDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-                  {[...Array(7)].map((_, i) => (
+                  {filteredDesksByPlan().map((office) => (
                     <DeskCard
-                      key={`MR-0${i + 1}`}
-                      desk={{
-                        id: `MR-0${i + 1}`,
-                        type: "office",
-                        status: "available",
-                      }}
-                      onClick={() => handleMeetingRoomClick(`MR-0${i + 1}`)}
+                      key={office.id}
+                      desk={office}
+                      onClick={handleDeskCardClick}
                     />
                   ))}
-                  <DeskCard
-                    key="BoardRoom"
-                    desk={{
-                      id: "Board Room",
-                      type: "office",
-                      status: "available",
-                    }}
-                    onClick={() => handleBoardRoomClick()}
-                  />
                 </div>
               </CardContent>
             </Card>

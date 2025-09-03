@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,27 +7,72 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Calendar, Clock, MapPin } from "lucide-react";
+import { bookDesks, getProfile } from "@/services/apiClient";
 
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   deskId: string | null;
-  deskType?: 'desk' | 'office';
-  onConfirm: (deskId: string, date: string, time: string, type: 'desk' | 'office') => void;
+  status: string;
+  deskType?: string;
+  deskName: string | null;
+  onConfirm: (
+    deskId: string,
+    date: string,
+    time: string,
+    type: "desk" | "office",
+  ) => void;
   isBoardRoom?: boolean; // Add prop for board room
 }
 
-export const BookingModal = ({ isOpen, onClose, deskId, deskType = 'desk', onConfirm, isBoardRoom = false }: BookingModalProps) => {
+export const BookingModal = ({
+  isOpen,
+  onClose,
+  deskId,
+  status,
+  deskName,
+  deskType = "desk",
+  onConfirm,
+  isBoardRoom = false,
+}: BookingModalProps) => {
   // For board room, allow any date from today onwards
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [profile, setProfile] = useState([]);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getProfile();
+        setProfile(data);
+      } catch (err) {
+        console.error("Failed to fetch Profile", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const today = new Date();
-  const formatDate = (date: Date) => date.toISOString().split('T')[0];
-  const formatDisplayDate = (date: Date) => date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const formatDate = (date: Date) => date.toISOString().split("T")[0];
+  const formatDisplayDate = (date: Date) =>
+    date.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
 
   const timeSlots = [
     "08:00 AM",
@@ -50,18 +95,29 @@ export const BookingModal = ({ isOpen, onClose, deskId, deskType = 'desk', onCon
     "04:30 PM",
     "05:00 PM",
     "05:30 PM",
-    "06:00 PM"
+    "06:00 PM",
   ];
 
   const handleConfirm = async () => {
     if (deskId && selectedDate && selectedTime) {
       setIsLoading(true);
-      
-      // Simulate API call delay for better UX
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      onConfirm(deskId, selectedDate, selectedTime, deskType);
-      
+
+      const data = {
+        desk_name: deskId,
+        selected_date: selectedDate,
+        selected_time: selectedTime,
+      };
+
+      console.log(data);
+
+      try {
+        const res = await bookDesks(data);
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        onConfirm(deskId, selectedDate, selectedTime, deskType);
+      } catch (err) {
+        console.log(err.message);
+      }
+
       // Reset form
       setSelectedDate("");
       setSelectedTime("");
@@ -80,30 +136,36 @@ export const BookingModal = ({ isOpen, onClose, deskId, deskType = 'desk', onCon
       <DialogContent className="sm:max-w-md animate-scale-in">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2 text-primary">
-            <div className="bg-gradient-primary p-2 rounded-lg">
-              <MapPin className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span>Book {deskType === 'office' ? 'Office' : 'Desk'} {deskId}</span>
+            <span>
+              Book {deskType === "meeting room" ? "Office" : "Desk"} {deskId}
+            </span>
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-6 py-4">
           {/* Date Selection */}
-          <div className="space-y-3 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          <div
+            className="space-y-3 animate-slide-up"
+            style={{ animationDelay: "0.1s" }}
+          >
             <Label className="text-base font-medium flex items-center space-x-2">
               <Calendar className="h-4 w-4" />
               <span>Select Date</span>
             </Label>
-            {deskType === 'office' || isBoardRoom ? (
+            {deskType === "office" || isBoardRoom ? (
               <input
                 type="date"
                 min={formatDate(today)}
                 value={selectedDate}
-                onChange={e => setSelectedDate(e.target.value)}
+                onChange={(e) => setSelectedDate(e.target.value)}
                 className="border rounded px-2 py-1 w-full border-primary/20 focus:border-primary"
                 disabled={isLoading}
               />
             ) : (
-              <Select value={selectedDate} onValueChange={setSelectedDate} disabled={isLoading}>
+              <Select
+                value={selectedDate}
+                onValueChange={setSelectedDate}
+                disabled={isLoading}
+              >
                 <SelectTrigger className="border-primary/20 focus:border-primary transition-all duration-300 hover:border-primary/40">
                   <SelectValue placeholder="Choose a date" />
                 </SelectTrigger>
@@ -111,8 +173,11 @@ export const BookingModal = ({ isOpen, onClose, deskId, deskType = 'desk', onCon
                   <SelectItem value={formatDate(today)}>
                     Today - {formatDisplayDate(today)}
                   </SelectItem>
-                  <SelectItem value={formatDate(new Date(today.getTime() + 86400000))}>
-                    Tomorrow - {formatDisplayDate(new Date(today.getTime() + 86400000))}
+                  <SelectItem
+                    value={formatDate(new Date(today.getTime() + 86400000))}
+                  >
+                    Tomorrow -{" "}
+                    {formatDisplayDate(new Date(today.getTime() + 86400000))}
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -120,12 +185,19 @@ export const BookingModal = ({ isOpen, onClose, deskId, deskType = 'desk', onCon
           </div>
 
           {/* Time Selection */}
-          <div className="space-y-3 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <div
+            className="space-y-3 animate-slide-up"
+            style={{ animationDelay: "0.2s" }}
+          >
             <Label className="text-base font-medium flex items-center space-x-2">
               <Clock className="h-4 w-4" />
               <span>Select Time</span>
             </Label>
-            <Select value={selectedTime} onValueChange={setSelectedTime} disabled={isLoading}>
+            <Select
+              value={selectedTime}
+              onValueChange={setSelectedTime}
+              disabled={isLoading}
+            >
               <SelectTrigger className="border-primary/20 focus:border-primary transition-all duration-300 hover:border-primary/40">
                 <SelectValue placeholder="Choose a time" />
               </SelectTrigger>
@@ -144,24 +216,39 @@ export const BookingModal = ({ isOpen, onClose, deskId, deskType = 'desk', onCon
             <div className="bg-gradient-card rounded-lg p-4 space-y-2 animate-fade-in border border-primary/10">
               <h4 className="font-medium text-primary">Booking Summary</h4>
               <div className="text-sm text-muted-foreground space-y-1">
-                <p><strong>{deskType === 'office' ? 'Office' : 'Desk'}:</strong> {deskId}</p>
-                <p><strong>Date:</strong> {isBoardRoom ? formatDisplayDate(new Date(selectedDate)) : (selectedDate === formatDate(today) ? 'Today' : 'Tomorrow')}</p>
-                <p><strong>Time:</strong> {selectedTime}</p>
+                <p>
+                  <strong>{deskType === "office" ? "Office" : "Desk"}:</strong>{" "}
+                  {deskId}
+                </p>
+                <p>
+                  <strong>Date:</strong>{" "}
+                  {isBoardRoom
+                    ? formatDisplayDate(new Date(selectedDate))
+                    : selectedDate === formatDate(today)
+                      ? "Today"
+                      : "Tomorrow"}
+                </p>
+                <p>
+                  <strong>Time:</strong> {selectedTime}
+                </p>
               </div>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="flex space-x-3 pt-4 animate-slide-up" style={{ animationDelay: '0.3s' }}>
-            <Button 
-              variant="outline" 
+          <div
+            className="flex space-x-3 pt-4 animate-slide-up"
+            style={{ animationDelay: "0.3s" }}
+          >
+            <Button
+              variant="outline"
               onClick={handleClose}
               className="flex-1"
               disabled={isLoading}
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleConfirm}
               disabled={!selectedDate || !selectedTime || isLoading}
               variant="default"
@@ -178,7 +265,9 @@ export const BookingModal = ({ isOpen, onClose, deskId, deskType = 'desk', onCon
           <ul className="space-y-1">
             {isBoardRoom ? (
               <>
-                <li>• Bookings can be made for any future date from today onwards</li>
+                <li>
+                  • Bookings can be made for any future date from today onwards
+                </li>
                 <li>• Connect to office WiFi to automatically check in</li>
                 <li>• Cancel bookings at least 2 hours in advance</li>
               </>

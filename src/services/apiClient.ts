@@ -110,3 +110,8 @@ export const getProfile = () => fetchAPI("acc/me");
 
 // desks
 export const getDesks = () => fetchAPI("management/desks/");
+export const bookDesks = (data: any) =>
+  fetchAPI("bookings/bookings/user/book/", "POST", data);
+export const userBookedDesks = () =>
+  fetchAPI("bookings/bookings/user/history/");
+export const allBookedDesks = () => fetchAPI("bookings/bookings/");
