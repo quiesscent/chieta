@@ -30,7 +30,17 @@ import {
   WifiOff,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { getDesks, getProfile } from "@/services/apiClient";
 
+interface Desk {
+  id: number;
+  name: string;
+  code: string;
+  status: string;
+  type: string;
+  description: string;
+  max_capacity: number;
+}
 const UserDashboard = () => {
   const [selectedDesk, setSelectedDesk] = useState<string | null>(null);
   const [selectedDeskType, setSelectedDeskType] = useState<"desk" | "office">(
@@ -98,6 +108,41 @@ const UserDashboard = () => {
       type: "office",
     },
   ]);
+
+  const [profile, setProfile] = useState([]);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getProfile();
+        setProfile(data);
+      } catch (err) {
+        console.error("Failed to fetch Profile", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const [desks, setDesks] = useState([]);
+  useEffect(() => {
+    const fetchDesks = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getDesks();
+        setDesks(data);
+        console.log(data);
+      } catch (err) {
+        console.error("Failed to fetch Desks", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDesks();
+  }, []);
 
   // Sample desk data for open floor plan - Updated to match OP format
   const openFloorDesks = [
@@ -272,8 +317,8 @@ const UserDashboard = () => {
 
   // Filter desks by selected tab
   const filteredDesksByTab = () => {
-    if (deskStatusTab === "all") return openFloorDesks;
-    return openFloorDesks.filter((desk) => desk.status === deskStatusTab);
+    if (deskStatusTab === "all") return desks;
+    return desks.filter((desk) => desk.status === deskStatusTab);
   };
 
   const handleDeskCardClick = (deskId: string, status: string) => {
@@ -588,7 +633,7 @@ const UserDashboard = () => {
         {/* Welcome Section */}
         <div className="mb-6 sm:mb-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-primary mb-2">
-            Welcome back, User!
+            Welcome back, {profile?.username}
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground">
             Manage your desk bookings and check your office visit analytics.

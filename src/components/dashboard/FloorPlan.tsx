@@ -1,10 +1,10 @@
 import { useState } from "react";
-
+import floorplan from "@/assets/plan.svg";
 interface Desk {
   id: string;
   x: number; // percentage from left
   y: number; // percentage from top
-  status: 'available' | 'unavailable' | 'booked' | 'inactive';
+  status: "available" | "unavailable" | "booked" | "inactive";
 }
 
 interface FloorPlanProps {
@@ -12,7 +12,10 @@ interface FloorPlanProps {
   userBookings?: Array<{ deskId: string; status: string }>;
 }
 
-export const FloorPlan = ({ onDeskClick, userBookings = [] }: FloorPlanProps) => {
+export const FloorPlan = ({
+  onDeskClick,
+  userBookings = [],
+}: FloorPlanProps) => {
   // Detailed floor plan based on uploaded image - OP-1 to OP-52
   const [desks] = useState<Desk[]>([
     // Top Row (OP-1 to OP-9)
@@ -25,7 +28,6 @@ export const FloorPlan = ({ onDeskClick, userBookings = [] }: FloorPlanProps) =>
     // { id: "OP-07", x: 53, y: 15, status: 'available' },
     // { id: "OP-08", x: 75, y: 15, status: 'available' },
     // { id: "OP-09", x: 81, y: 15, status: 'inactive' },
-
     // // Second Row (OP-10 to OP-18)
     // { id: "OP-10", x: 12, y: 25, status: 'available' },
     // { id: "OP-11", x: 18, y: 25, status: 'available' },
@@ -36,7 +38,6 @@ export const FloorPlan = ({ onDeskClick, userBookings = [] }: FloorPlanProps) =>
     // { id: "OP-16", x: 53, y: 25, status: 'booked' },
     // { id: "OP-17", x: 75, y: 25, status: 'available' },
     // { id: "OP-18", x: 81, y: 25, status: 'available' },
-
     // // Third Row (OP-19 to OP-27)
     // { id: "OP-19", x: 12, y: 40, status: 'available' },
     // { id: "OP-20", x: 18, y: 40, status: 'available' },
@@ -47,7 +48,6 @@ export const FloorPlan = ({ onDeskClick, userBookings = [] }: FloorPlanProps) =>
     // { id: "OP-25", x: 53, y: 40, status: 'available' },
     // { id: "OP-26", x: 75, y: 40, status: 'available' },
     // { id: "OP-27", x: 81, y: 40, status: 'inactive' },
-
     // // Fourth Row (OP-28 to OP-36)
     // { id: "OP-28", x: 12, y: 50, status: 'available' },
     // { id: "OP-29", x: 18, y: 50, status: 'available' },
@@ -58,7 +58,6 @@ export const FloorPlan = ({ onDeskClick, userBookings = [] }: FloorPlanProps) =>
     // { id: "OP-34", x: 53, y: 50, status: 'available' },
     // { id: "OP-35", x: 75, y: 50, status: 'available' },
     // { id: "OP-36", x: 81, y: 50, status: 'available' },
-
     // // Fifth Row (OP-37 to OP-44)
     // { id: "OP-37", x: 12, y: 65, status: 'available' },
     // { id: "OP-38", x: 18, y: 65, status: 'available' },
@@ -68,7 +67,6 @@ export const FloorPlan = ({ onDeskClick, userBookings = [] }: FloorPlanProps) =>
     // { id: "OP-42", x: 53, y: 65, status: 'available' },
     // { id: "OP-43", x: 75, y: 65, status: 'available' },
     // { id: "OP-44", x: 81, y: 65, status: 'unavailable' },
-
     // // Bottom Row (OP-45 to OP-52)
     // { id: "OP-45", x: 12, y: 75, status: 'available' },
     // { id: "OP-46", x: 18, y: 75, status: 'available' },
@@ -82,37 +80,40 @@ export const FloorPlan = ({ onDeskClick, userBookings = [] }: FloorPlanProps) =>
 
   const getDeskStatus = (desk: Desk) => {
     // Check if this desk is booked by the current user
-    const userBooking = userBookings.find(booking => 
-      booking.deskId === desk.id && 
-      (booking.status === 'reserved' || booking.status === 'checked-in')
+    const userBooking = userBookings.find(
+      (booking) =>
+        booking.deskId === desk.id &&
+        (booking.status === "reserved" || booking.status === "checked-in"),
     );
-    
+
     if (userBooking) {
-      return userBooking.status === 'checked-in' ? 'checked-in' : 'booked';
+      return userBooking.status === "checked-in" ? "checked-in" : "booked";
     }
-    
+
     return desk.status;
   };
 
   const getDeskColor = (status: string) => {
     switch (status) {
-      case 'available':
-        return 'bg-desk-available hover:bg-green-600 border-green-600';
-      case 'unavailable':
-        return 'bg-desk-unavailable border-red-600';
-      case 'booked':
-        return 'bg-desk-booked border-orange-600';
-      case 'checked-in':
-        return 'bg-blue-500 border-blue-600';
-      case 'inactive':
-        return 'bg-desk-inactive border-gray-500';
+      case "available":
+        return "bg-desk-available hover:bg-green-600 border-green-600";
+      case "unavailable":
+        return "bg-desk-unavailable border-red-600";
+      case "booked":
+        return "bg-desk-booked border-orange-600";
+      case "checked-in":
+        return "bg-blue-500 border-blue-600";
+      case "inactive":
+        return "bg-desk-inactive border-gray-500";
       default:
-        return 'bg-gray-300 border-gray-400';
+        return "bg-gray-300 border-gray-400";
     }
   };
 
   const getDeskCursor = (status: string) => {
-    return status === 'available' || status === 'booked' ? 'cursor-pointer' : 'cursor-not-allowed';
+    return status === "available" || status === "booked"
+      ? "cursor-pointer"
+      : "cursor-not-allowed";
   };
 
   return (
@@ -121,11 +122,11 @@ export const FloorPlan = ({ onDeskClick, userBookings = [] }: FloorPlanProps) =>
       <div className="relative bg-secondary/10 rounded-lg overflow-hidden">
         <div className="relative w-full">
           <img
-            src="/lovable-uploads/c2b9e3e9-65a6-41d6-9229-e0226278954c.png"
+            src={floorplan}
             alt="Office floor plan with desks OP-1 to OP-52"
             className="w-full h-auto rounded-lg"
           />
-          
+
           {/* Desk markers overlaid on the floor plan */}
           {desks.map((desk) => {
             const status = getDeskStatus(desk);
@@ -136,22 +137,21 @@ export const FloorPlan = ({ onDeskClick, userBookings = [] }: FloorPlanProps) =>
                 style={{
                   left: `${desk.x}%`,
                   top: `${desk.y}%`,
-                  transform: 'translate(-50%, -50%)',
-                  animationDelay: `${Math.random() * 0.5}s`
+                  transform: "translate(-50%, -50%)",
+                  animationDelay: `${Math.random() * 0.5}s`,
                 }}
                 onClick={() => onDeskClick(desk.id, status)}
                 title={`Desk ${desk.id} - ${status}`}
-                disabled={status === 'unavailable' || status === 'inactive'}
+                disabled={status === "unavailable" || status === "inactive"}
               >
                 <span className="text-xs font-bold">
-                  {desk.id.split('-')[1]}
+                  {desk.id.split("-")[1]}
                 </span>
               </button>
             );
           })}
         </div>
       </div>
-
     </div>
   );
 };

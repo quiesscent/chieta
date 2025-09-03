@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  User, 
-  Mail, 
+import {
+  User,
+  Mail,
   Building,
   Calendar,
   MapPin,
@@ -15,10 +15,11 @@ import {
   ArrowLeft,
   Edit,
   Save,
-  BarChart3
+  BarChart3,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Footer } from "@/components/ui/footer";
+import { getProfile } from "@/services/apiClient";
 
 const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -28,19 +29,67 @@ const UserProfile = () => {
     name: "John Doe",
     email: "user@demo.com",
     username: "johndoe",
-    companyNumber: "EMP-2024-001"
+    companyNumber: "EMP-2024-001",
   });
+
+  const [profile, setProfile] = useState([]);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getProfile();
+        setProfile(data);
+      } catch (err) {
+        console.error("Failed to fetch Profile", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const [editData, setEditData] = useState(profileData);
   const { toast } = useToast();
 
   // Sample booking history
   const bookingHistory = [
-    { id: "1", desk: "D-15", date: "2024-01-15", status: "checked-in", checkInTime: "09:30" },
-    { id: "2", desk: "D-22", date: "2024-01-14", status: "completed", checkInTime: "10:15" },
-    { id: "3", desk: "D-08", date: "2024-01-13", status: "completed", checkInTime: "09:00" },
-    { id: "4", desk: "D-15", date: "2024-01-12", status: "completed", checkInTime: "08:45" },
-    { id: "5", desk: "D-30", date: "2024-01-11", status: "completed", checkInTime: "09:20" },
+    {
+      id: "1",
+      desk: "D-15",
+      date: "2024-01-15",
+      status: "checked-in",
+      checkInTime: "09:30",
+    },
+    {
+      id: "2",
+      desk: "D-22",
+      date: "2024-01-14",
+      status: "completed",
+      checkInTime: "10:15",
+    },
+    {
+      id: "3",
+      desk: "D-08",
+      date: "2024-01-13",
+      status: "completed",
+      checkInTime: "09:00",
+    },
+    {
+      id: "4",
+      desk: "D-15",
+      date: "2024-01-12",
+      status: "completed",
+      checkInTime: "08:45",
+    },
+    {
+      id: "5",
+      desk: "D-30",
+      date: "2024-01-11",
+      status: "completed",
+      checkInTime: "09:20",
+    },
   ];
 
   const pendingCheckIns = [
@@ -51,26 +100,26 @@ const UserProfile = () => {
     thisMonth: 12,
     thisWeek: 3,
     totalHours: 156,
-    averageStay: "6.5 hours"
+    averageStay: "6.5 hours",
   };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!editData.name.trim()) {
       newErrors.name = "Name is required";
     }
-    
+
     if (!editData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(editData.email)) {
       newErrors.email = "Please enter a valid email";
     }
-    
+
     if (!editData.username.trim()) {
       newErrors.username = "Username is required";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -79,12 +128,12 @@ const UserProfile = () => {
     if (!validateForm()) {
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     // Simulate API call delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     setProfileData(editData);
     setIsEditing(false);
     setIsLoading(false);
@@ -102,35 +151,35 @@ const UserProfile = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setEditData(prev => ({
+    setEditData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ""
+        [name]: "",
       }));
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'checked-in':
-        return 'default';
-      case 'completed':
-        return 'secondary';
-      case 'cancelled':
-        return 'destructive';
+      case "checked-in":
+        return "default";
+      case "completed":
+        return "secondary";
+      case "cancelled":
+        return "destructive";
       default:
-        return 'outline';
+        return "outline";
     }
   };
 
-  const userType = localStorage.getItem('userType');
-  const dashboardPath = userType === 'admin' ? '/admin' : '/dashboard';
+  const userType = localStorage.getItem("userType");
+  const dashboardPath = userType === "admin" ? "/admin" : "/dashboard";
 
   return (
     <div className="min-h-screen bg-background">
@@ -139,7 +188,7 @@ const UserProfile = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <Link 
+              <Link
                 to={dashboardPath}
                 className="flex items-center text-muted-foreground hover:text-primary transition-colors"
               >
@@ -187,75 +236,101 @@ const UserProfile = () => {
                 {/* Profile Header - No Avatar */}
                 <div className="text-center pb-4 border-b border-border">
                   <h3 className="text-xl font-semibold text-primary">
-                    {profileData.name}
+                    {profile?.first_name} &nbsp; {profile?.last_name}
                   </h3>
-                  <p className="text-muted-foreground">@{profileData.username}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{profileData.companyNumber}</p>
+                  <p className="text-muted-foreground">@{profile?.username}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {profile?.employee_number}
+                  </p>
                 </div>
 
                 {/* Profile Fields */}
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="name" className={errors.name ? "text-destructive" : ""}>
-                      Full Name {errors.name && <span className="text-destructive">*</span>}
+                    <Label
+                      htmlFor="name"
+                      className={errors.name ? "text-destructive" : ""}
+                    >
+                      Full Name{" "}
+                      {errors.name && (
+                        <span className="text-destructive">*</span>
+                      )}
                     </Label>
                     <Input
                       id="name"
                       name="name"
-                      value={isEditing ? editData.name : profileData.name}
+                      value={`${profile?.first_name}  ${profile?.last_name}`}
                       onChange={handleChange}
                       disabled={!isEditing || isLoading}
                       className={`border-primary/20 focus:border-primary transition-all duration-300 ${
-                        errors.name 
-                          ? "border-destructive focus:border-destructive animate-shake" 
+                        errors.name
+                          ? "border-destructive focus:border-destructive animate-shake"
                           : "hover:border-primary/40"
                       }`}
                     />
                     {errors.name && (
-                      <p className="text-sm text-destructive mt-1 animate-fade-in">{errors.name}</p>
+                      <p className="text-sm text-destructive mt-1 animate-fade-in">
+                        {errors.name}
+                      </p>
                     )}
                   </div>
 
                   <div>
-                    <Label htmlFor="email" className={errors.email ? "text-destructive" : ""}>
-                      Email Address {errors.email && <span className="text-destructive">*</span>}
+                    <Label
+                      htmlFor="email"
+                      className={errors.email ? "text-destructive" : ""}
+                    >
+                      Email Address{" "}
+                      {errors.email && (
+                        <span className="text-destructive">*</span>
+                      )}
                     </Label>
                     <Input
                       id="email"
                       name="email"
                       type="email"
-                      value={isEditing ? editData.email : profileData.email}
+                      value={profile?.email}
                       onChange={handleChange}
                       disabled={!isEditing || isLoading}
                       className={`border-primary/20 focus:border-primary transition-all duration-300 ${
-                        errors.email 
-                          ? "border-destructive focus:border-destructive animate-shake" 
+                        errors.email
+                          ? "border-destructive focus:border-destructive animate-shake"
                           : "hover:border-primary/40"
                       }`}
                     />
                     {errors.email && (
-                      <p className="text-sm text-destructive mt-1 animate-fade-in">{errors.email}</p>
+                      <p className="text-sm text-destructive mt-1 animate-fade-in">
+                        {errors.email}
+                      </p>
                     )}
                   </div>
 
                   <div>
-                    <Label htmlFor="username" className={errors.username ? "text-destructive" : ""}>
-                      Username {errors.username && <span className="text-destructive">*</span>}
+                    <Label
+                      htmlFor="username"
+                      className={errors.username ? "text-destructive" : ""}
+                    >
+                      Username{" "}
+                      {errors.username && (
+                        <span className="text-destructive">*</span>
+                      )}
                     </Label>
                     <Input
                       id="username"
                       name="username"
-                      value={isEditing ? editData.username : profileData.username}
+                      value={profile?.username}
                       onChange={handleChange}
                       disabled={!isEditing || isLoading}
                       className={`border-primary/20 focus:border-primary transition-all duration-300 ${
-                        errors.username 
-                          ? "border-destructive focus:border-destructive animate-shake" 
+                        errors.username
+                          ? "border-destructive focus:border-destructive animate-shake"
                           : "hover:border-primary/40"
                       }`}
                     />
                     {errors.username && (
-                      <p className="text-sm text-destructive mt-1 animate-fade-in">{errors.username}</p>
+                      <p className="text-sm text-destructive mt-1 animate-fade-in">
+                        {errors.username}
+                      </p>
                     )}
                   </div>
 
@@ -264,7 +339,7 @@ const UserProfile = () => {
                     <Input
                       id="companyNumber"
                       name="companyNumber"
-                      value={profileData.companyNumber}
+                      value={profile?.company_number}
                       disabled
                       className="border-primary/20"
                     />
@@ -273,19 +348,19 @@ const UserProfile = () => {
 
                 {isEditing && (
                   <div className="flex space-x-2 animate-fade-in">
-                    <Button 
-                      size="sm" 
-                      onClick={handleSave} 
+                    <Button
+                      size="sm"
+                      onClick={handleSave}
                       className="flex-1"
                       loading={isLoading}
                       disabled={isLoading}
                     >
                       Save Changes
                     </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      onClick={handleCancel} 
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCancel}
                       className="flex-1"
                       disabled={isLoading}
                     >
@@ -307,20 +382,36 @@ const UserProfile = () => {
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-3 bg-secondary/20 rounded-lg">
-                    <div className="text-2xl font-bold text-primary">{officeVisitStats.thisMonth}</div>
-                    <div className="text-sm text-muted-foreground">This Month</div>
+                    <div className="text-2xl font-bold text-primary">
+                      {officeVisitStats.thisMonth}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      This Month
+                    </div>
                   </div>
                   <div className="text-center p-3 bg-secondary/20 rounded-lg">
-                    <div className="text-2xl font-bold text-primary">{officeVisitStats.thisWeek}</div>
-                    <div className="text-sm text-muted-foreground">This Week</div>
+                    <div className="text-2xl font-bold text-primary">
+                      {officeVisitStats.thisWeek}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      This Week
+                    </div>
                   </div>
                   <div className="text-center p-3 bg-secondary/20 rounded-lg">
-                    <div className="text-2xl font-bold text-primary">{officeVisitStats.totalHours}</div>
-                    <div className="text-sm text-muted-foreground">Total Hours</div>
+                    <div className="text-2xl font-bold text-primary">
+                      {officeVisitStats.totalHours}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Total Hours
+                    </div>
                   </div>
                   <div className="text-center p-3 bg-secondary/20 rounded-lg">
-                    <div className="text-lg font-bold text-primary">{officeVisitStats.averageStay}</div>
-                    <div className="text-sm text-muted-foreground">Avg. Stay</div>
+                    <div className="text-lg font-bold text-primary">
+                      {officeVisitStats.averageStay}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Avg. Stay
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -341,7 +432,7 @@ const UserProfile = () => {
                 {pendingCheckIns.length > 0 ? (
                   <div className="space-y-3">
                     {pendingCheckIns.map((booking) => (
-                      <div 
+                      <div
                         key={booking.id}
                         className="flex items-center justify-between p-4 bg-warning/10 border border-warning/20 rounded-lg"
                       >
@@ -358,9 +449,7 @@ const UserProfile = () => {
                             </p>
                           </div>
                         </div>
-                        <Badge variant="secondary">
-                          Pending Check-in
-                        </Badge>
+                        <Badge variant="secondary">Pending Check-in</Badge>
                       </div>
                     ))}
                   </div>
@@ -383,7 +472,7 @@ const UserProfile = () => {
               <CardContent>
                 <div className="space-y-3">
                   {bookingHistory.map((booking) => (
-                    <div 
+                    <div
                       key={booking.id}
                       className="flex items-center justify-between p-4 bg-secondary/10 rounded-lg"
                     >
@@ -401,9 +490,11 @@ const UserProfile = () => {
                         </div>
                       </div>
                       <Badge variant={getStatusColor(booking.status)}>
-                        {booking.status === 'checked-in' ? 'Checked In' :
-                         booking.status === 'completed' ? 'Completed' :
-                         booking.status}
+                        {booking.status === "checked-in"
+                          ? "Checked In"
+                          : booking.status === "completed"
+                            ? "Completed"
+                            : booking.status}
                       </Badge>
                     </div>
                   ))}
