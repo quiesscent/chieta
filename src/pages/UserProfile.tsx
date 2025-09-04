@@ -20,6 +20,8 @@ import {
 import { Link } from "react-router-dom";
 import { Footer } from "@/components/ui/footer";
 import { getProfile, userBookedDesks } from "@/services/apiClient";
+import { Navbar } from "@/components/ui/navbar";
+
 
 const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -201,8 +203,9 @@ const UserProfile = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Navbar />
       {/* Header */}
-      <header className="bg-white border-b border-border shadow-custom-sm">
+      <header className="bg-white mt-12 shadow-custom-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">

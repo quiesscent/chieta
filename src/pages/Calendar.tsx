@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 import { format, addMonths, subMonths, isSameMonth, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { Navbar } from "@/components/ui/navbar";
 
 interface BookingEvent {
   id: string;
@@ -85,8 +86,9 @@ export const Calendar = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Navbar />
       {/* Header */}
-      <header className="bg-background border-b border-border sticky top-0 z-10">
+      <header className="bg-background mt-10 border-b border-border sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -136,21 +138,27 @@ export const Calendar = () => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <CalendarComponent
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  month={currentDate}
-                  onMonthChange={setCurrentDate}
-                  className="w-full"
-                  modifiers={{
-                    hasBooking: (date) => getBookingsForDate(date).length > 0
-                  }}
-                  modifiersClassNames={{
-                    hasBooking: "bg-primary/10 text-primary font-semibold"
-                  }}
-                />
+              <CardContent className="flex justify-center items-center">
+                <div className="scale-110 origin-top">
+                  <CalendarComponent
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    month={currentDate}
+                    onMonthChange={setCurrentDate}
+                    className="w-full max-w-none text-lg 
+      [&_.rdp-month]:w-full 
+      [&_.rdp-table]:w-full 
+      [&_.rdp-cell]:w-[5rem] 
+      [&_.rdp-day]:h-[5rem] [&_.rdp-day]:w-[5rem]"
+                    modifiers={{
+                      hasBooking: (date) => getBookingsForDate(date).length > 0
+                    }}
+                    modifiersClassNames={{
+                      hasBooking: "bg-primary/10 text-primary font-semibold"
+                    }}
+                  />
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -198,7 +206,7 @@ export const Calendar = () => {
               </CardContent>
             </Card>
 
-            {/* Monthly Summary */}
+            {/* Monthly Summary
             <Card className="shadow-custom-md">
               <CardHeader>
                 <CardTitle className="text-lg font-bold text-primary">
@@ -239,7 +247,7 @@ export const Calendar = () => {
                   </div>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
         </div>
       </div>
