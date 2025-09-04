@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FloorPlan } from "@/components/dashboard/FloorPlan";
+import FloorPlan from "@/components/dashboard/NewFloorPlan";
 import { BookingModal } from "@/components/dashboard/BookingModal";
 import { DeskCard } from "@/components/dashboard/DeskCard";
 import { DeskFilter } from "@/components/dashboard/DeskFilter";
@@ -920,30 +920,25 @@ const UserDashboard = () => {
 
         {/* Floor Plan and Desk Management */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="open floor plan">Open Floor Plan</TabsTrigger>
-            <TabsTrigger value="executive room">Executive Suite</TabsTrigger>
-            <TabsTrigger value="meeting room">Meeting Rooms</TabsTrigger>
-          </TabsList>
+          <Card className="shadow-custom-md">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-primary">
+                Open Floor Plan
+              </CardTitle>
+              <p className="text-muted-foreground">
+                Interactive floor plan and available desks
+              </p>
+            </CardHeader>
+            <CardContent>
+              <FloorPlan
+                selectedDesk={selectedDesk}
+                currentBooking={userBookings}
+                onDeskClick={handleDeskCardClick}
+              />
+            </CardContent>
+          </Card>
 
           <TabsContent value="open floor plan" className="space-y-6">
-            <Card className="shadow-custom-md">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold text-primary">
-                  Open Floor Plan
-                </CardTitle>
-                <p className="text-muted-foreground">
-                  Interactive floor plan and available desks
-                </p>
-              </CardHeader>
-              <CardContent>
-                <FloorPlan
-                  onDeskClick={handleDeskCardClick}
-                  userBookings={userBookings}
-                />
-              </CardContent>
-            </Card>
-
             {/* Desk Cards for Open Floor */}
             <Card className="shadow-custom-md">
               <CardHeader>
@@ -1086,19 +1081,6 @@ const UserDashboard = () => {
         }}
         booking={selectedBooking}
         onCancel={handleBookingCancel}
-      />
-
-      {/* Booking Modal for Meeting Rooms */}
-      <BookingModal
-        isOpen={isMeetingRoomModalOpen}
-        onClose={() => {
-          setIsMeetingRoomModalOpen(false);
-          setSelectedMeetingRoom(null);
-        }}
-        deskId={selectedMeetingRoom}
-        deskType="office"
-        onConfirm={handleBookingConfirm}
-        isBoardRoom={selectedMeetingRoom === "Board Room"}
       />
 
       {/* Reserved Desk Details Modal */}
