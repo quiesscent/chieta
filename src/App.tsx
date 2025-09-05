@@ -17,17 +17,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <HashRouter>
-        <Routes>
-          <Route path="/" element={<Auth />} />
-          <Route path="/dashboard" element={<UserDashboard />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/profile" element={<UserProfile />} />
-          <Route path="*" element={<NotFound />} />
-          <Route path="/calendar" element={<Calendar />} />
-        </Routes>
-      </HashRouter>
-      {/*<AuthProvider>
+      <AuthProvider>
         <HashRouter>
           <Routes>
             <Route path="/" element={<Auth />} />
@@ -56,11 +46,10 @@ const App = () => (
               }
             />
             <Route path="/calendar" element={<Calendar />} />
-      <Route path="*" element={<NotFound />} />
-      </Routes>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </HashRouter>
       </AuthProvider>
-      */}
     </TooltipProvider>
   </QueryClientProvider>
 );

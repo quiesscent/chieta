@@ -148,7 +148,7 @@ const Auth = () => {
             </form>
 
             {/* Demo credentials */}
-            {isLogin && (
+            {/*{isLogin && (
               <div
                 className="mt-6 p-4 bg-primary/5 rounded-lg animate-fade-in border border-primary/20"
                 style={{ animationDelay: "0.6s" }}
@@ -161,7 +161,7 @@ const Auth = () => {
                   <div>Admin: admin@demo.com / admin123</div>
                 </div>
               </div>
-            )}
+            )}*/}
 
             {/* <div className="mt-6 text-center animate-fade-in" style={{ animationDelay: '0.7s' }}>
               <button
