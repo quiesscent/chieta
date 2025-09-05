@@ -1,11 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
-import { format, addMonths, subMonths, isSameMonth, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
+import {
+  format,
+  addMonths,
+  subMonths,
+  isSameMonth,
+  isSameDay,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+} from "date-fns";
 import { useNavigate } from "react-router-dom";
+import Header from "@/components/Header";
+import { bookingData, getAllBookings } from "@/services/apiClient";
 
 interface BookingEvent {
   id: string;
@@ -13,13 +24,15 @@ interface BookingEvent {
   date: Date;
   time: string;
   deskId: string;
-  type: 'desk' | 'office';
-  status: 'reserved' | 'checked-in' | 'completed';
+  type: "desk" | "office";
+  status: "reserved" | "checked-in" | "completed";
 }
 
 export const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    new Date(),
+  );
   const navigate = useNavigate();
 
   // Mock booking events data
@@ -31,112 +44,96 @@ export const Calendar = () => {
       time: "09:00",
       deskId: "D-01",
       type: "desk",
-      status: "reserved"
+      status: "reserved",
     },
     {
-      id: "2", 
+      id: "2",
       title: "Office O-05 Meeting",
       date: new Date(2024, 11, 18),
       time: "14:30",
       deskId: "O-05",
       type: "office",
-      status: "checked-in"
+      status: "checked-in",
     },
     {
       id: "3",
       title: "Desk D-12 Booking",
-      date: new Date(2024, 11, 20),
+      date: new Date(2025, 8, 20),
       time: "08:00",
       deskId: "D-12",
       type: "desk",
-      status: "completed"
+      status: "completed",
     },
     {
       id: "4",
       title: "Desk D-08 Booking",
-      date: new Date(2024, 11, 22),
+      date: new Date(2025, 8, 4),
       time: "10:00",
       deskId: "D-08",
       type: "desk",
-      status: "reserved"
-    }
+      status: "reserved",
+    },
   ]);
 
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    setCurrentDate(prev => direction === 'prev' ? subMonths(prev, 1) : addMonths(prev, 1));
+  const navigateMonth = (direction: "prev" | "next") => {
+    setCurrentDate((prev) =>
+      direction === "prev" ? subMonths(prev, 1) : addMonths(prev, 1),
+    );
   };
 
+  const [allBookings, setDesks] = useState([]);
+  const [isLoading, setIsLoading] = useState([]);
+  useEffect(() => {
+    const fetchDesks = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getAllBookings();
+        setDesks(data);
+        console.log(data);
+      } catch (err) {
+        console.error("Failed to fetch Desks", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDesks();
+  }, []);
+
+  function formatToJsDate(dateString: string) {
+    const [year, month, day] = dateString.split("-").map(Number);
+    return `new Date(${year}, ${month - 1}, ${day})`;
+  }
+
   const getBookingsForDate = (date: Date) => {
-    return bookings.filter(booking => isSameDay(booking.date, date));
+    return allBookings.filter((booking) => {
+      const bookingDate = new Date(booking.checkin_date);
+      return isSameDay(bookingDate, date);
+    });
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'reserved':
-        return 'bg-warning text-warning-foreground';
-      case 'checked-in':
-        return 'bg-primary text-primary-foreground';
-      case 'completed':
-        return 'bg-success text-success-foreground';
+      case "reserved":
+        return "bg-warning text-warning-foreground";
+      case "active":
+        return "bg-primary text-primary-foreground";
+      case "completed":
+        return "bg-success text-success-foreground";
       default:
-        return 'bg-muted text-muted-foreground';
+        return "bg-muted text-muted-foreground";
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-background border-b border-border sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate(-1)}
-                className="flex items-center space-x-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span>Back</span>
-              </Button>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-primary">Calendar</h1>
-                <p className="text-sm text-muted-foreground">View your booking schedule</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
+      <Header />
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
           {/* Calendar Section */}
-          <div className="lg:col-span-2">
-            <Card className="shadow-custom-md">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-bold text-primary">
-                    {format(currentDate, 'MMMM yyyy')}
-                  </CardTitle>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigateMonth('prev')}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigateMonth('next')}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
+          <div className="w-full">
+            <Card className="shadow-custom-md w-full">
+              <CardContent className="w-full">
                 <CalendarComponent
                   mode="single"
                   selected={selectedDate}
@@ -145,10 +142,10 @@ export const Calendar = () => {
                   onMonthChange={setCurrentDate}
                   className="w-full"
                   modifiers={{
-                    hasBooking: (date) => getBookingsForDate(date).length > 0
+                    hasBooking: (date) => getBookingsForDate(date).length > 0,
                   }}
                   modifiersClassNames={{
-                    hasBooking: "bg-primary/10 text-primary font-semibold"
+                    hasBooking: "bg-primary/10 text-primary font-semibold",
                   }}
                 />
               </CardContent>
@@ -160,7 +157,9 @@ export const Calendar = () => {
             <Card className="shadow-custom-md">
               <CardHeader>
                 <CardTitle className="text-lg font-bold text-primary">
-                  {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Select a date'}
+                  {selectedDate
+                    ? format(selectedDate, "MMMM d, yyyy")
+                    : "Select a date"}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -168,19 +167,29 @@ export const Calendar = () => {
                   <div className="space-y-3">
                     {getBookingsForDate(selectedDate).length > 0 ? (
                       getBookingsForDate(selectedDate).map((booking) => (
-                        <div key={booking.id} className="p-3 bg-secondary/20 rounded-lg">
+                        <div
+                          key={booking.id}
+                          className="p-3 bg-secondary/20 rounded-lg"
+                        >
                           <div className="flex items-start justify-between mb-2">
                             <div>
-                              <p className="font-medium text-primary">{booking.title}</p>
-                              <p className="text-sm text-muted-foreground">{booking.time}</p>
+                              <p className="font-medium text-primary">
+                                Booked by: {booking.user.username}
+                              </p>
+                              <p className="font-medium text-primary">
+                                Date: {booking.checkin_date}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                Time: {booking.checkin_time}
+                              </p>
                             </div>
                             <Badge className={getStatusColor(booking.status)}>
-                              {booking.status}
+                              Status: {booking.status}
                             </Badge>
                           </div>
                           <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                            <span>{booking.type === 'desk' ? '🪑' : '🏢'}</span>
-                            <span>{booking.deskId}</span>
+                            <span>{booking.type === "desk" ? "🪑" : "🏢"}</span>
+                            <span>{booking.desk.name}</span>
                           </div>
                         </div>
                       ))
@@ -195,49 +204,6 @@ export const Calendar = () => {
                     Click on a date to view bookings.
                   </p>
                 )}
-              </CardContent>
-            </Card>
-
-            {/* Monthly Summary */}
-            <Card className="shadow-custom-md">
-              <CardHeader>
-                <CardTitle className="text-lg font-bold text-primary">
-                  Monthly Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Total Bookings</span>
-                    <Badge variant="outline">
-                      {bookings.filter(b => isSameMonth(b.date, currentDate)).length}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Reserved</span>
-                    <Badge className="bg-warning text-warning-foreground">
-                      {bookings.filter(b => 
-                        isSameMonth(b.date, currentDate) && b.status === 'reserved'
-                      ).length}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Checked In</span>
-                    <Badge className="bg-primary text-primary-foreground">
-                      {bookings.filter(b => 
-                        isSameMonth(b.date, currentDate) && b.status === 'checked-in'
-                      ).length}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Completed</span>
-                    <Badge className="bg-success text-success-foreground">
-                      {bookings.filter(b => 
-                        isSameMonth(b.date, currentDate) && b.status === 'completed'
-                      ).length}
-                    </Badge>
-                  </div>
-                </div>
               </CardContent>
             </Card>
           </div>

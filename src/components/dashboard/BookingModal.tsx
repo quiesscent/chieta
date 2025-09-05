@@ -16,11 +16,13 @@ import {
 } from "@/components/ui/select";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import { bookDesks, getProfile } from "@/services/apiClient";
+import { useToast } from "@/hooks/use-toast";
+import { resolvePath } from "react-router-dom";
 
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  deskId: string | null;
+  deskId: any;
   status: string;
   deskType?: string;
   deskName: string | null;
@@ -48,6 +50,7 @@ export const BookingModal = ({
   const [selectedTime, setSelectedTime] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [profile, setProfile] = useState([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -103,7 +106,7 @@ export const BookingModal = ({
       setIsLoading(true);
 
       const data = {
-        desk_name: deskId,
+        desk_name: deskId.name,
         selected_date: selectedDate,
         selected_time: selectedTime,
       };
@@ -113,15 +116,22 @@ export const BookingModal = ({
       try {
         const res = await bookDesks(data);
         await new Promise((resolve) => setTimeout(resolve, 800));
-        onConfirm(deskId, selectedDate, selectedTime, deskType);
+        console.log(resolvePath);
+
+        onConfirm(deskId.id, selectedDate, selectedTime, deskId?.isBooked);
+        setIsLoading(false);
       } catch (err) {
-        console.log(err.message);
+        onClose();
+        toast({
+          title: "You can not have two bookings at once",
+          description: err.message.error,
+          variant: "destructive",
+        });
       }
 
       // Reset form
       setSelectedDate("");
       setSelectedTime("");
-      setIsLoading(false);
     }
   };
 
@@ -136,9 +146,7 @@ export const BookingModal = ({
       <DialogContent className="sm:max-w-md animate-scale-in">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2 text-primary">
-            <span>
-              Book {deskType === "meeting room" ? "Office" : "Desk"} {deskId}
-            </span>
+            <span>Book {deskId?.name}</span>
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-6 py-4">
@@ -151,7 +159,7 @@ export const BookingModal = ({
               <Calendar className="h-4 w-4" />
               <span>Select Date</span>
             </Label>
-            {deskType === "office" || isBoardRoom ? (
+            {deskId?.type === "office" || isBoardRoom ? (
               <input
                 type="date"
                 min={formatDate(today)}
@@ -160,7 +168,7 @@ export const BookingModal = ({
                 className="border rounded px-2 py-1 w-full border-primary/20 focus:border-primary"
                 disabled={isLoading}
               />
-            ) : (
+            ) : deskId?.type === "Open Floor Plan" ? (
               <Select
                 value={selectedDate}
                 onValueChange={setSelectedDate}
@@ -181,6 +189,15 @@ export const BookingModal = ({
                   </SelectItem>
                 </SelectContent>
               </Select>
+            ) : (
+              // Calendar for other desk types (non-open floor, non-office, non-boardroom)
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="border rounded px-2 py-1 w-full border-primary/20 focus:border-primary"
+                disabled={isLoading}
+              />
             )}
           </div>
 
@@ -218,15 +235,11 @@ export const BookingModal = ({
               <div className="text-sm text-muted-foreground space-y-1">
                 <p>
                   <strong>{deskType === "office" ? "Office" : "Desk"}:</strong>{" "}
-                  {deskId}
+                  {deskId.name}
                 </p>
                 <p>
                   <strong>Date:</strong>{" "}
-                  {isBoardRoom
-                    ? formatDisplayDate(new Date(selectedDate))
-                    : selectedDate === formatDate(today)
-                      ? "Today"
-                      : "Tomorrow"}
+                  {formatDisplayDate(new Date(selectedDate))}
                 </p>
                 <p>
                   <strong>Time:</strong> {selectedTime}

@@ -37,7 +37,9 @@ const Auth = () => {
             description: `Welcome back!`,
           });
         }
-        navigate(role == "admin" ? "/admin" : "/dashboard");
+        navigate(
+          role == "admin" || role == "company" ? "/admin" : "/dashboard",
+        );
       } catch (err) {
         toast({
           title: err.message,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +47,13 @@ import {
 } from "lucide-react";
 import chietaLogo from "@/assets/chieta-logo.jpeg";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  bookingData,
+  getDashboardStats,
+  getDesks,
+  getUsers,
+  updateDeskStatus,
+} from "@/services/apiClient";
 
 const AdminDashboard = () => {
   const [employees, setEmployees] = useState([
@@ -121,24 +128,24 @@ const AdminDashboard = () => {
     useState(false);
 
   // Sample desk data for management
-  const [desks, setDesks] = useState(
-    Array.from({ length: 32 }, (_, index) => {
-      const deskNumber = (index + 1).toString().padStart(2, "0");
-      const statuses = ["available", "unavailable", "booked", "inactive"];
-      const randomStatus =
-        statuses[Math.floor(Math.random() * statuses.length)];
+  // const [desks, setDesks] = useState(
+  //   Array.from({ length: 32 }, (_, index) => {
+  //     const deskNumber = (index + 1).toString().padStart(2, "0");
+  //     const statuses = ["available", "unavailable", "booked", "inactive"];
+  //     const randomStatus =
+  //       statuses[Math.floor(Math.random() * statuses.length)];
 
-      return {
-        id: `D-${deskNumber}`,
-        type: "desk" as const,
-        status: randomStatus,
-        currentUser:
-          randomStatus === "booked" || randomStatus === "checked-in"
-            ? employees[Math.floor(Math.random() * employees.length)]?.name
-            : undefined,
-      };
-    }),
-  );
+  //     return {
+  //       id: `D-${deskNumber}`,
+  //       type: "desk" as const,
+  //       status: randomStatus,
+  //       currentUser:
+  //         randomStatus === "booked" || randomStatus === "checked-in"
+  //           ? employees[Math.floor(Math.random() * employees.length)]?.name
+  //           : undefined,
+  //     };
+  //   }),
+  // );
 
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -195,24 +202,25 @@ const AdminDashboard = () => {
     setIsDeskModalOpen(true);
   };
 
-  const handleDeskStatusUpdate = (deskId: string, newStatus: string) => {
-    setDesks((prev) =>
-      prev.map((desk) =>
-        desk.id === deskId
-          ? {
-              ...desk,
-              status: newStatus,
-              currentUser:
-                newStatus === "available" ? undefined : desk.currentUser,
-            }
-          : desk,
-      ),
-    );
+  const handleDeskStatusUpdate = async (deskId: string, newStatus: string) => {
+    // logic
+    const data = {
+      status: newStatus,
+    };
+    try {
+      const update = await updateDeskStatus(Number(deskId?.id), data);
+    } catch (err) {
+      toast({
+        title: "Update Failed",
+        description: err.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("userType");
-    localStorage.removeItem("userEmail");
+    localStorage.removeItem("chieta_user_token");
+    localStorage.removeItem("chieta_user_refresh");
     toast({
       title: "Successfully Logged Out",
       description: "See you next time!",
@@ -225,6 +233,24 @@ const AdminDashboard = () => {
     downloadCSV(prepareDeskData(desks), "all-desks");
     downloadCSV(prepareLogData(userLogs), "all-logs");
     // If bookings data exists, add here
+  };
+
+  const handleExport = async () => {
+    try {
+      const response = await bookingData();
+      if (!response.ok) throw new Error("Failed to download");
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "bookings.csv";
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to download bookings CSV");
+    }
   };
 
   const stats = [
@@ -254,6 +280,78 @@ const AdminDashboard = () => {
     },
   ];
 
+  // core logic
+  const [isLoading, setIsLoading] = useState(false);
+  const [staff, setStaff] = useState([]);
+  useEffect(() => {
+    const fetchStaff = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getUsers();
+        setStaff(data.slice(0, 5));
+      } catch (err) {
+        console.error("Failed to fetch Staff", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStaff();
+  }, []);
+
+  const [desks, setDesks] = useState([]);
+
+  useEffect(() => {
+    const fetchDesks = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getDesks();
+        setDesks(data);
+        console.log(data);
+      } catch (err) {
+        console.error("Failed to fetch Desks", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDesks();
+  }, []);
+
+  const [chStats, setStats] = useState([]);
+
+  useEffect(() => {
+    const fetchDesks = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getDashboardStats();
+        setStats(data);
+        console.log(data);
+      } catch (err) {
+        console.error("Failed to fetch Stats", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDesks();
+  }, []);
+
+  // dashboard stats format
+  // {
+  // "total_employees": 120,
+  // "active_bookings": 15,
+  // "daily_logins": [
+  //   {"day": "2025-08-29", "total": 30},
+  //   {"day": "2025-08-30", "total": 28},
+  //   {"day": "2025-08-31", "total": 35}
+  // ],
+  // "desk_utilization_percentage": 64.7,
+  // "weekly_utilization": [
+  //   {"day": "2025-08-29", "total": 10},
+  //   {"day": "2025-08-30", "total": 8},
+  //   {"day": "2025-08-31", "total": 15}
+  // ]
+  // }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -262,11 +360,13 @@ const AdminDashboard = () => {
           <div className="flex justify-between items-center h-14 sm:h-16 gap-2">
             <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
               <div className="p-1.5 sm:p-2 rounded-lg flex items-center">
-                <img
-                  src={chietaLogo}
-                  alt="Chieta Logo"
-                  className="h-10 w-15 mr-2"
-                />
+                <button onClick={() => navigate("/admin")}>
+                  <img
+                    src={chietaLogo}
+                    alt="Chieta Logo"
+                    className="h-10 w-15 mr-2"
+                  />
+                </button>
               </div>
               <div className="min-w-0">
                 <h1 className="text-lg sm:text-xl font-bold text-primary truncate flex items-center">
@@ -279,22 +379,16 @@ const AdminDashboard = () => {
             </div>
 
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <Link to="/calendar">
-                <Button variant="outline" size="sm" className="flex items-center space-x-2">
+              <button onClick={() => navigate("/calendar")}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center space-x-2"
+                >
                   <Calendar className="h-4 w-4" />
                   <span className="hidden sm:inline">Calendar</span>
                 </Button>
-              </Link>
-              
-              <Link to="/profile">
-                {/* <Button variant="ghost" size="sm" className="hidden sm:flex">
-                  <User className="h-4 w-4 mr-2" />
-                  Admin Profile
-                </Button> */}
-                <Button variant="ghost" size="sm" className="sm:hidden p-2">
-                  <User className="h-4 w-4" />
-                </Button>
-              </Link>
+              </button>
 
               <Button
                 variant="outline"
@@ -463,7 +557,7 @@ const AdminDashboard = () => {
               {/* Employee List */}
               <div className="overflow-x-auto">
                 <div className="space-y-3 min-w-full">
-                  {employees.map((employee) => (
+                  {staff.map((employee) => (
                     <div
                       key={employee.id}
                       className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 bg-secondary/10 rounded-lg gap-3 sm:gap-4 min-w-0"
@@ -474,26 +568,19 @@ const AdminDashboard = () => {
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="font-semibold text-primary truncate">
-                            {employee.name}
+                            {employee?.username}
                           </p>
                           <p className="text-sm text-muted-foreground truncate">
-                            {employee.email}
-                          </p>
-                          <p className="text-xs text-muted-foreground whitespace-nowrap">
-                            {employee.loginFrequency} logins this month
+                            {employee?.email}
                           </p>
                         </div>
                       </div>
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto shrink-0">
                         <Badge
-                          variant={
-                            employee.status === "active"
-                              ? "default"
-                              : "secondary"
-                          }
+                          variant={employee.is_active ? "default" : "secondary"}
                           className="whitespace-nowrap"
                         >
-                          {employee.status}
+                          {employee.is_active ? "Active" : "Not Active"}
                         </Badge>
                         <div className="flex gap-1 w-full sm:w-auto shrink-0">
                           <Button
@@ -505,19 +592,7 @@ const AdminDashboard = () => {
                             <Eye className="h-3 w-3 sm:mr-1" />
                             <span className="hidden sm:inline">View</span>
                           </Button>
-                          {/* <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedEmployee(employee);
-                              setIsEmployeeUpdateModalOpen(true);
-                            }}
-                            className="text-xs px-2 py-1 h-7 whitespace-nowrap"
-                          >
-                            <Edit className="h-3 w-3 sm:mr-1" />
-                            <span className="hidden sm:inline">Edit</span>
-                          </Button> */}
-                          <Button
+                          {/*<Button
                             size="sm"
                             variant="outline"
                             onClick={() => {
@@ -536,15 +611,7 @@ const AdminDashboard = () => {
                             className="text-xs px-2 py-1 h-7 whitespace-nowrap"
                           >
                             <Download className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleRemoveEmployee(employee.id)}
-                            className="text-xs px-2 py-1 h-7 whitespace-nowrap"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
+                          </Button>*/}
                         </div>
                       </div>
                     </div>
@@ -600,7 +667,7 @@ const AdminDashboard = () => {
             {/* Desk grid using cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
               {desks.map((desk) => (
-                <Card 
+                <Card
                   key={desk.id}
                   className="transition-all duration-300 cursor-pointer hover:shadow-custom-md border-2"
                   onClick={() => handleDeskClick(desk)}
@@ -608,17 +675,14 @@ const AdminDashboard = () => {
                   <CardContent className="p-3">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
-                        <div className="bg-gradient-primary p-1.5 rounded-lg">
-                          <MapPin className="h-3 w-3 text-primary-foreground" />
-                        </div>
                         <div>
                           <h4 className="font-semibold text-primary text-sm">
-                            {desk.id}
+                            {desk.name}
                           </h4>
                         </div>
                       </div>
-                      
-                      <Badge 
+
+                      <Badge
                         className={`text-xs ${
                           desk.status === "available"
                             ? "bg-success text-success-foreground"
@@ -629,7 +693,8 @@ const AdminDashboard = () => {
                                 : "bg-muted text-muted-foreground"
                         }`}
                       >
-                        {desk.status.charAt(0).toUpperCase() + desk.status.slice(1)}
+                        {desk.status.charAt(0).toUpperCase() +
+                          desk.status.slice(1)}
                       </Badge>
                     </div>
 

@@ -105,13 +105,47 @@ export const logout = () => {
   localStorage.removeItem("chieta_user_refresh");
 };
 
-// profiles
-export const getProfile = () => fetchAPI("acc/me");
+// user accounts
+export const getProfile = () => fetchAPI("acc/me/");
+
+export const getUsers = () => fetchAPI("management/users/");
+
+export const activateUser = (id: number | string) =>
+  fetchAPI(`management/users/${id}/activate/`, "POST");
+
+export const suspendUser = (id: number | string) =>
+  fetchAPI(`management/users/${id}/deactivate/`, "POST");
+
+export const updateUser = (id: number | string, data: any) =>
+  fetchAPI(`management/users/${id}/`, "PATCH", data);
 
 // desks
 export const getDesks = () => fetchAPI("management/desks/");
+
+export const updateDeskStatus = (id: number | string, data: any) =>
+  fetchAPI(`management/desks/${id}/set-status/`, "PATCH", data);
+
+// bookings
+export const bookingData = () =>
+  fetchAPI("bookings/bookings/booking/data/csv/");
+
 export const bookDesks = (data: any) =>
   fetchAPI("bookings/bookings/user/book/", "POST", data);
+
 export const userBookedDesks = () =>
   fetchAPI("bookings/bookings/user/history/");
-export const allBookedDesks = () => fetchAPI("bookings/bookings/");
+
+export const getAllBookings = () => fetchAPI("bookings/bookings/");
+
+// analytics
+export const getBookingTrends = () =>
+  fetchAPI("analytics/analytics/booking_trends/");
+
+export const getDashboardStats = () =>
+  fetchAPI("analytics/analytics/dashboard_stats/");
+
+export const getDeskUtilization = () =>
+  fetchAPI("analytics/analytics/desk_utilization/");
+
+export const getWeeklyTrends = () =>
+  fetchAPI("analytics/analytics/weekly_trends/");

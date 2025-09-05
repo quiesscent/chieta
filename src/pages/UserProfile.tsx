@@ -16,10 +16,15 @@ import {
   Edit,
   Save,
   BarChart3,
+  Wifi,
+  WifiOff,
+  LogOut,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Footer } from "@/components/ui/footer";
 import { getProfile, userBookedDesks } from "@/services/apiClient";
+import Header from "@/components/Header";
+import { useToast } from "@/hooks/use-toast";
 
 const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -69,50 +74,10 @@ const UserProfile = () => {
   }, []);
 
   const [editData, setEditData] = useState(profileData);
-  const { toast } = useToast();
 
-  // Sample booking history
-  const bookingHistory = [
-    {
-      id: "1",
-      desk: "D-15",
-      date: "2024-01-15",
-      status: "checked-in",
-      checkInTime: "09:30",
-    },
-    {
-      id: "2",
-      desk: "D-22",
-      date: "2024-01-14",
-      status: "completed",
-      checkInTime: "10:15",
-    },
-    {
-      id: "3",
-      desk: "D-08",
-      date: "2024-01-13",
-      status: "completed",
-      checkInTime: "09:00",
-    },
-    {
-      id: "4",
-      desk: "D-15",
-      date: "2024-01-12",
-      status: "completed",
-      checkInTime: "08:45",
-    },
-    {
-      id: "5",
-      desk: "D-30",
-      date: "2024-01-11",
-      status: "completed",
-      checkInTime: "09:20",
-    },
-  ];
-
-  const pendingCheckIns = [
-    { id: "6", desk: "D-25", date: "2024-01-16", time: "09:00" },
-  ];
+  const pendingCheckIns = () => {
+    return history?.filter((booking) => booking?.status === "reserved");
+  };
 
   const officeVisitStats = {
     thisMonth: 12,
@@ -185,7 +150,7 @@ const UserProfile = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "checked-in":
+      case "active":
         return "default";
       case "completed":
         return "secondary";
@@ -201,23 +166,7 @@ const UserProfile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-white border-b border-border shadow-custom-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Link
-                to={dashboardPath}
-                className="flex items-center text-muted-foreground hover:text-primary transition-colors"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Dashboard
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
+      <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Profile Information */}
@@ -357,7 +306,7 @@ const UserProfile = () => {
                     <Input
                       id="companyNumber"
                       name="companyNumber"
-                      value={profile?.company_number}
+                      value={profile?.employee_number}
                       disabled
                       className="border-primary/20"
                     />
@@ -388,52 +337,6 @@ const UserProfile = () => {
                 )}
               </CardContent>
             </Card>
-
-            {/* Office Visit Analytics */}
-            <Card className="mt-6 shadow-custom-md">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold text-primary flex items-center">
-                  <BarChart3 className="h-5 w-5 mr-2" />
-                  Visit Analytics
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-secondary/20 rounded-lg">
-                    <div className="text-2xl font-bold text-primary">
-                      {officeVisitStats.thisMonth}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      This Month
-                    </div>
-                  </div>
-                  <div className="text-center p-3 bg-secondary/20 rounded-lg">
-                    <div className="text-2xl font-bold text-primary">
-                      {officeVisitStats.thisWeek}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      This Week
-                    </div>
-                  </div>
-                  <div className="text-center p-3 bg-secondary/20 rounded-lg">
-                    <div className="text-2xl font-bold text-primary">
-                      {officeVisitStats.totalHours}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Total Hours
-                    </div>
-                  </div>
-                  <div className="text-center p-3 bg-secondary/20 rounded-lg">
-                    <div className="text-lg font-bold text-primary">
-                      {officeVisitStats.averageStay}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Avg. Stay
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
 
           {/* Booking History and Activity */}
@@ -447,9 +350,9 @@ const UserProfile = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {pendingCheckIns.length > 0 ? (
+                {pendingCheckIns().length > 0 ? (
                   <div className="space-y-3">
-                    {pendingCheckIns.map((booking) => (
+                    {pendingCheckIns().map((booking) => (
                       <div
                         key={booking.id}
                         className="flex items-center justify-between p-4 bg-warning/10 border border-warning/20 rounded-lg"
@@ -460,10 +363,10 @@ const UserProfile = () => {
                           </div>
                           <div>
                             <p className="font-semibold text-primary">
-                              Desk {booking.desk}
+                              Desk {booking?.desk?.name}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              {booking.date} at {booking.time}
+                              {booking?.checkin_date} at {booking?.checkin_time}
                             </p>
                           </div>
                         </div>
@@ -509,7 +412,7 @@ const UserProfile = () => {
                         </div>
                       </div>
                       <Badge variant={getStatusColor(booking.status)}>
-                        {booking.status === "checked-in"
+                        {booking.status === "active"
                           ? "Checked In"
                           : booking.status === "completed"
                             ? "Completed"
