@@ -24,7 +24,6 @@ import { useNavigate } from "react-router-dom";
 import { Footer } from "@/components/ui/footer";
 import { getProfile, userBookedDesks } from "@/services/apiClient";
 import Header from "@/components/Header";
-import { useToast } from "@/hooks/use-toast";
 
 const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);

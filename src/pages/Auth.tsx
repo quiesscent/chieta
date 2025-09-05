@@ -30,6 +30,7 @@ const Auth = () => {
       try {
         const res = await login(formData);
         const role = res.data.user.role;
+        localStorage.setItem("user", res.data.user);
         console.log(res);
         if (res.status == 200) {
           toast({

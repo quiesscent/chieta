@@ -17,39 +17,37 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <AuthProvider>
-        <HashRouter>
-          <Routes>
-            <Route path="/" element={<Auth />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute requiredRole={["employee", "executive"]}>
-                  <UserDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute requiredRole={["admin", "company"]}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <UserProfile />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </HashRouter>
-      </AuthProvider>
+      <HashRouter>
+        <Routes>
+          <Route path="/" element={<Auth />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute requiredRole={["employee", "executive"]}>
+                <UserDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requiredRole={["admin", "company"]}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <UserProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/calendar" element={<Calendar />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </HashRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );

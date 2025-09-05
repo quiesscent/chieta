@@ -128,6 +128,7 @@ export const Calendar = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <Header />
+
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
           {/* Calendar Section */}
