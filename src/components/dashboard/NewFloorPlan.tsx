@@ -611,19 +611,21 @@ const FloorPlan = ({
 
       // open the modal
       setIsReservedDeskModalOpen(true);
-    }
-
-    if (desk?.type === "Executive Room" && profile?.role === "employee") {
+    } else if (
+      desk?.type === "Executive Room" &&
+      profile?.role === "employee"
+    ) {
       toast({
         title: "Only Executives Can Book This Room",
         description:
           "Kinldy log in as an executive to make a booking to this room.",
         variant: "destructive",
       });
+    } else {
+      setSelectedDesk(desk);
+      setSelectedDeskType(desk?.type || "desk");
+      setIsBookingModalOpen(true);
     }
-    setSelectedDesk(desk);
-    setSelectedDeskType(desk?.type || "desk");
-    setIsBookingModalOpen(true);
   };
 
   const getDeskColor = (desk: Desk) => {
